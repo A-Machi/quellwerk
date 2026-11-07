@@ -101,7 +101,20 @@ src/
 
 ## Befehle
 
-`npm run dev` · `npm run build` · `npm run lint` · `npx tsc --noEmit`
+`npm run dev` · `npm run build` · `npm run lint` · `npm run typecheck`
+
+## Tests
+
+| Befehl | Was | Netzwerk |
+|---|---|---|
+| `npm test` | Unit-Tests (`src/**/*.test.ts`): Chunking, PDF-Extraktion, Validierung, Fehlermeldungen, Status-Logik | nein |
+| `npm run test:integration` | Integrationstests (`tests/integration/`) gegen die echte Supabase-DB: RLS, Notebooks, Quellen, Pipeline. Legt temporäre Test-Nutzer an (`quellwerk-test-*@example.com`) und löscht sie samt Daten und Dateien wieder. Embeddings sind gefälscht (`fakeEmbedder`), kosten also keine Neurons. | Supabase |
+| `RUN_AI_TESTS=1 npm run test:integration` | zusätzlich echte Workers-AI-Aufrufe (ein paar Neurons) | Supabase + Cloudflare |
+| `npm run verify` | Lint + Typecheck + Unit + Integration | Supabase |
+
+- **Pipeline:** `vercel.json` setzt `buildCommand` auf `npm run verify && npm run build`. Schlägt ein Test fehl, deployt Vercel nicht, die alte Version bleibt live. Die Integrationstests brauchen dafür die Env-Variablen in Vercel (aktuell nur Production, Preview-Builds würden daran scheitern).
+- **Neue Funktion = neuer Test.** Services bekommen den Supabase-Client und das Embedding als Parameter, damit Tests echte Test-Nutzer und Fake-Embeddings übergeben können.
+- Die Warnung `npm warn Unknown env config "cache-dir"` im Vercel-Log kommt aus Vercels Build-Umgebung, nicht aus dem Projekt. Ignorieren.
 
 ## Git
 

@@ -24,13 +24,18 @@ Stand: 2026-11-07
 | lucide-react | 1.70.0 | ISC | Laufzeit | https://github.com/lucide-icons/lucide |
 | react-resizable-panels | 4.19.1 | MIT | Laufzeit | https://github.com/bvaughn/react-resizable-panels |
 | tw-animate-css | 1.4.0 | MIT | Laufzeit | https://github.com/Wombosvideo/tw-animate-css |
+| unpdf | 2.1.0 | MIT (enthält pdf.js: Apache-2.0, OpenJPEG und JBIG2: BSD) | Laufzeit | https://github.com/unjs/unpdf |
+| sonner | 2.0.8 | MIT | Laufzeit | https://github.com/emilkowalski/sonner |
+| next-themes | 0.4.6 | MIT | Laufzeit | https://github.com/pacocoursey/next-themes |
+| vitest | 5.1.0 | MIT | Entwicklung | https://github.com/vitest-dev/vitest |
+| pdf-lib | 1.17.1 | MIT | Entwicklung (Test-PDFs) | https://github.com/Hopding/pdf-lib |
 | tailwindcss | 4.3.5 | MIT | Entwicklung | https://github.com/tailwindlabs/tailwindcss |
 | @tailwindcss/turbopack | 4.3.5 | MIT | Entwicklung | https://github.com/tailwindlabs/tailwindcss |
 | typescript | 5.9.3 | Apache-2.0 | Entwicklung | https://github.com/microsoft/TypeScript |
 | eslint | 9.39.5 | MIT | Entwicklung | https://github.com/eslint/eslint |
 | eslint-config-next | 16.4.5 | MIT | Entwicklung | https://github.com/vercel/next.js |
 | supabase (CLI) | 3.0.0 | MIT | Entwicklung | https://github.com/supabase/cli |
-| @types/node, @types/react, @types/react-dom | 20.x / 19.x | MIT | Entwicklung | https://github.com/DefinitelyTyped/DefinitelyTyped |
+| @types/node, @types/react, @types/react-dom | 24.x / 19.x | MIT | Entwicklung | https://github.com/DefinitelyTyped/DefinitelyTyped |
 
 Die UI-Komponenten unter `src/frontend/components/ui/` stammen aus shadcn/ui (MIT) und wurden ins Projekt kopiert.
 
@@ -52,11 +57,12 @@ Lizenzen am 2026-11-07 über die Hugging-Face-API geprüft.
 
 ## Transitive Abhängigkeiten (Prüfung 2026-11-07)
 
-Alle 657 Einträge aus `package-lock.json` geprüft (inkl. optionaler Plattform-Pakete). **Keine GPL, keine AGPL, kein Paket ohne Lizenzangabe.**
+Alle 703 Einträge aus `package-lock.json` geprüft (inkl. optionaler Plattform-Pakete). **Keine GPL, keine AGPL, kein Paket ohne Lizenzangabe.**
 
 | Lizenz | Anzahl | Bewertung |
 |---|---|---|
-| MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, BlueOak-1.0.0, CC0-1.0, Python-2.0 | 628 | ✅ erlaubt |
+| MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, BlueOak-1.0.0, CC0-1.0, Python-2.0 | 673 | ✅ erlaubt |
+| MIT AND Zlib (`pako`, über pdf-lib, nur in Tests) | 1 | ✅ erlaubt |
 | CC-BY-4.0 (`caniuse-lite`, Browserdaten) | 1 | ✅ erlaubt, Namensnennung ist im Paket enthalten |
 | AFL-2.1 OR BSD-3-Clause (`json-schema`) | 1 | ✅ wir nutzen es unter BSD-3-Clause |
 | MPL-2.0 (`lightningcss`, `axe-core`) | 13 | ⚠️ erlaubt, nur Build- und Lint-Werkzeuge, unverändert genutzt |

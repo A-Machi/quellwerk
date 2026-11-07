@@ -80,9 +80,9 @@ Format: *Als Nutzer möchte ich …, damit …* · Größe: S (< 1 Tag), M (1–
 
 #### US-00 – Einloggen · S · Must
 Als Nutzer möchte ich mich einloggen, damit niemand anderes meine Notebooks sieht oder meine Free-Tier-Kontingente verbraucht.
-- [ ] Login-Seite mit E-Mail und Passwort (Supabase Auth)
-- [ ] Alle anderen Seiten und API Routes sind ohne Login gesperrt
-- [ ] Logout-Button
+- [x] Login-Seite mit E-Mail und Passwort (Supabase Auth)
+- [x] Alle anderen Seiten und API Routes sind ohne Login gesperrt
+- [x] Logout-Button
 
 *Braucht:* V-03, V-05
 
@@ -90,16 +90,16 @@ Als Nutzer möchte ich mich einloggen, damit niemand anderes meine Notebooks sie
 
 #### US-01 – Notebook anlegen · S · Must
 Als Nutzer möchte ich ein neues Notebook mit einem Titel anlegen, damit ich Quellen zu einem Thema bündeln kann.
-- [ ] Button „Neues Notebook“ auf der Startseite
-- [ ] Titel ist editierbar, Standard „Unbenanntes Notebook“
-- [ ] Nach dem Anlegen öffnet sich das Notebook
+- [x] Button „Neues Notebook“ auf der Startseite
+- [x] Titel ist editierbar, Standard „Unbenanntes Notebook“
+- [x] Nach dem Anlegen öffnet sich das Notebook
 
 *Braucht:* US-00
 
 #### US-02 – Notebooks verwalten · S · Must
 Als Nutzer möchte ich alle Notebooks sehen, öffnen, umbenennen und löschen, damit ich den Überblick behalte.
-- [ ] Startseite zeigt alle Notebooks mit Titel, Anzahl Quellen, Datum
-- [ ] Löschen fragt nach Bestätigung und entfernt Quellen, Chunks, Dateien und Chatverlauf mit
+- [x] Startseite zeigt alle Notebooks mit Titel, Anzahl Quellen, Datum
+- [x] Löschen fragt nach Bestätigung und entfernt Quellen, Chunks, Dateien und Chatverlauf mit
 
 *Braucht:* US-01
 
@@ -107,35 +107,35 @@ Als Nutzer möchte ich alle Notebooks sehen, öffnen, umbenennen und löschen, d
 
 #### US-03 – PDF hochladen · M · Must
 Als Nutzer möchte ich ein oder mehrere PDFs in ein Notebook hochladen, damit ich Fragen dazu stellen kann.
-- [ ] Upload per Button und Drag & Drop
-- [ ] Nur PDF erlaubt, max. 50 MB pro Datei (Limit von Supabase Free)
-- [ ] Datei geht **direkt vom Browser** in den Storage-Bucket (Signed Upload URL), nicht durch eine API Route
-- [ ] Eintrag in `sources` mit Status `uploaded`
+- [x] Upload per Button und Drag & Drop
+- [x] Nur PDF erlaubt, max. 50 MB pro Datei (Limit von Supabase Free)
+- [x] Datei geht **direkt vom Browser** in den Storage-Bucket (Signed Upload URL), nicht durch eine API Route
+- [x] Eintrag in `sources` mit Status `uploaded`
 
 *Braucht:* US-01, V-03
 
 #### US-04 – PDF wird verarbeitet · L · Must
 Als Nutzer möchte ich, dass das PDF nach dem Upload automatisch durchsuchbar gemacht wird, damit der Chat es verwenden kann.
-- [ ] API Route auf Vercel lädt das PDF aus dem Storage und extrahiert den Text **seitenweise** (unpdf oder pdfjs-dist)
-- [ ] Text wird in Chunks geteilt (ca. 800 Token, ca. 100 Token Overlap, an Absatzgrenzen)
-- [ ] Embeddings über Workers AI (bge-m3) in Batches erzeugt und in `chunks` gespeichert
-- [ ] Status wechselt `uploaded → processing → ready`, bei Fehler `failed` mit Grund
-- [ ] PDF ohne Textschicht → `failed` mit Hinweis „Gescanntes PDF, wird noch nicht unterstützt“
-- [ ] Tageslimit von Workers AI erreicht → `failed` mit Hinweis „Tageslimit erreicht, morgen erneut versuchen“ und Button „Erneut verarbeiten“
-- [ ] Verarbeitung bleibt innerhalb der Function-Laufzeit von Vercel Hobby. Falls nötig: maximale Seitenzahl fürs MVP festlegen (Wert nach Messung in V-04).
+- [x] API Route auf Vercel lädt das PDF aus dem Storage und extrahiert den Text **seitenweise** (unpdf oder pdfjs-dist)
+- [x] Text wird in Chunks geteilt (ca. 800 Token, ca. 100 Token Overlap, an Absatzgrenzen)
+- [x] Embeddings über Workers AI (bge-m3) in Batches erzeugt und in `chunks` gespeichert
+- [x] Status wechselt `uploaded → processing → ready`, bei Fehler `failed` mit Grund
+- [x] PDF ohne Textschicht → `failed` mit Hinweis „Gescanntes PDF, wird noch nicht unterstützt“
+- [x] Tageslimit von Workers AI erreicht → `failed` mit Hinweis „Tageslimit erreicht, morgen erneut versuchen“ und Button „Erneut verarbeiten“
+- [x] Verarbeitung bleibt innerhalb der Function-Laufzeit von Vercel Hobby. Falls nötig: maximale Seitenzahl fürs MVP festlegen (Wert nach Messung in V-04).
 
 *Braucht:* US-03, V-04
 
 #### US-05 – Verarbeitungsstatus sehen · S · Must
 Als Nutzer möchte ich sehen, ob eine Quelle noch verarbeitet wird oder fertig ist, damit ich weiß, wann ich fragen kann.
-- [ ] Quellenliste zeigt Status (Spinner, Haken, Fehler-Icon mit Grund)
-- [ ] Status aktualisiert sich ohne Neuladen der Seite
+- [x] Quellenliste zeigt Status (Spinner, Haken, Fehler-Icon mit Grund)
+- [x] Status aktualisiert sich ohne Neuladen der Seite
 
 *Braucht:* US-04
 
 #### US-06 – Quellen verwalten · S · Must
 Als Nutzer möchte ich Quellen umbenennen und löschen, damit falsche Uploads den Chat nicht stören.
-- [ ] Löschen entfernt Datei im Storage und alle zugehörigen Chunks
+- [x] Löschen entfernt Datei im Storage und alle zugehörigen Chunks
 
 *Braucht:* US-03
 
@@ -211,6 +211,8 @@ Sprint 4  Fertigstellen     US-11, US-13, US-08 (Should)
 ```
 
 Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen.
+
+**Stand 2026-11-07:** Sprint 0 und Sprint 1 erledigt, aus Sprint 2 sind US-04 und US-05 erledigt. Tests: 54 Unit-Tests (`npm test`) und 34 Integrationstests gegen Supabase (`npm run test:integration`), beide laufen vor jedem Vercel-Deployment (`npm run verify`). Offen in Sprint 2: US-07.
 
 ---
 
