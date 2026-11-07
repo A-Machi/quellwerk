@@ -141,9 +141,9 @@ Als Nutzer möchte ich Quellen umbenennen und löschen, damit falsche Uploads de
 
 #### US-07 – Quellen für den Chat auswählen · S · Must
 Als Nutzer möchte ich per Checkbox wählen, welche Quellen der Chat nutzt, damit ich Antworten auf bestimmte Dokumente eingrenzen kann.
-- [ ] Checkbox pro Quelle, „Alle auswählen“
-- [ ] Nur Quellen mit Status `ready` sind auswählbar
-- [ ] Auswahl wird bei der Suche als Filter verwendet
+- [x] Checkbox pro Quelle, „Alle auswählen“
+- [x] Nur Quellen mit Status `ready` sind auswählbar
+- [x] Auswahl wird bei der Suche als Filter verwendet
 
 *Braucht:* US-05
 
@@ -157,19 +157,19 @@ Als Nutzer möchte ich kopierten Text als Quelle einfügen, damit ich auch Inhal
 
 #### US-09 – Frage stellen und Antwort erhalten · L · Must
 Als Nutzer möchte ich eine Frage zu meinen Quellen stellen und eine Antwort bekommen, die nur auf diesen Quellen beruht.
-- [ ] Frage wird mit bge-m3 eingebettet, `match_chunks` liefert Top-k Chunks (ca. 8–10) aus den ausgewählten Quellen
-- [ ] Chunks nummeriert in den Prompt, System-Prompt verlangt Antworten nur aus den Quellen
-- [ ] Antwort wird **gestreamt** angezeigt
-- [ ] Markdown wird gerendert (Listen, Fett, Tabellen)
-- [ ] Ohne ausgewählte Quelle ist das Eingabefeld deaktiviert mit Hinweis
-- [ ] Tageslimit erreicht → klare Meldung im Chat statt Fehlerseite
+- [x] Frage wird mit bge-m3 eingebettet, `match_chunks` liefert Top-k Chunks (ca. 8–10) aus den ausgewählten Quellen
+- [x] Chunks nummeriert in den Prompt, System-Prompt verlangt Antworten nur aus den Quellen
+- [x] Antwort wird **gestreamt** angezeigt
+- [x] Markdown wird gerendert (Listen, Fett, Tabellen)
+- [x] Ohne ausgewählte Quelle ist das Eingabefeld deaktiviert mit Hinweis
+- [x] Tageslimit erreicht → klare Meldung im Chat statt Fehlerseite
 
 *Braucht:* US-04, US-07
 
 #### US-10 – Ehrliche Antwort, wenn nichts gefunden · S · Must
 Als Nutzer möchte ich klar erfahren, wenn die Quellen meine Frage nicht beantworten, damit ich keiner erfundenen Antwort vertraue.
-- [ ] Antwort lautet sinngemäß „Dazu steht nichts in den ausgewählten Quellen“
-- [ ] Mit 5 Testfragen geprüft, deren Antwort nicht in den Quellen steht
+- [x] Antwort lautet sinngemäß „Dazu steht nichts in den ausgewählten Quellen“
+- [x] Mit 5 Testfragen geprüft, deren Antwort nicht in den Quellen steht
 
 *Braucht:* US-09
 
@@ -185,9 +185,9 @@ Als Nutzer möchte ich nach dem Neuladen meinen bisherigen Chat sehen und Folgef
 
 #### US-12 – Zitate in der Antwort · M · Must
 Als Nutzer möchte ich zu jeder Aussage sehen, aus welcher Quelle sie stammt, damit ich sie prüfen kann.
-- [ ] Antwort enthält Marker `[1]`, `[2]` …
-- [ ] Marker werden als klickbare Chips angezeigt, Hover zeigt Quellname, Seite und Textausschnitt
-- [ ] Zitate verweisen nur auf tatsächlich mitgeschickte Chunks (ungültige Nummern werden entfernt)
+- [x] Antwort enthält Marker `[1]`, `[2]` …
+- [x] Marker werden als klickbare Chips angezeigt, Hover zeigt Quellname, Seite und Textausschnitt
+- [x] Zitate verweisen nur auf tatsächlich mitgeschickte Chunks (ungültige Nummern werden entfernt)
 
 *Braucht:* US-09
 
@@ -212,7 +212,7 @@ Sprint 4  Fertigstellen     US-11, US-13, US-08 (Should)
 
 Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen.
 
-**Stand 2026-11-07:** Sprint 0 und Sprint 1 erledigt, aus Sprint 2 sind US-04 und US-05 erledigt. Tests: 54 Unit-Tests (`npm test`) und 34 Integrationstests gegen Supabase (`npm run test:integration`), beide laufen vor jedem Vercel-Deployment (`npm run verify`). Offen in Sprint 2: US-07.
+**Stand 2026-11-07:** Sprint 0 bis 3 erledigt (inkl. US-07 aus Sprint 2). Tests: 80 Unit-Tests (`npm test`) und 42 Integrationstests gegen Supabase (`npm run test:integration`), beide laufen vor jedem Vercel-Deployment (`npm run verify`). Dazu 8 Tests mit echtem Workers AI (`RUN_AI_TESTS=1`), u. a. die 5 Testfragen für US-10.
 
 ---
 

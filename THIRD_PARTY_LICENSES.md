@@ -28,6 +28,8 @@ Stand: 2026-11-07
 | sonner | 2.0.8 | MIT | Laufzeit | https://github.com/emilkowalski/sonner |
 | next-themes | 0.4.6 | MIT | Laufzeit | https://github.com/pacocoursey/next-themes |
 | vitest | 5.1.0 | MIT | Entwicklung | https://github.com/vitest-dev/vitest |
+| react-markdown | 10.1.0 | MIT | Laufzeit | https://github.com/remarkjs/react-markdown |
+| remark-gfm | 4.0.1 | MIT | Laufzeit | https://github.com/remarkjs/remark-gfm |
 | pdf-lib | 1.17.1 | MIT | Entwicklung (Test-PDFs) | https://github.com/Hopding/pdf-lib |
 | tailwindcss | 4.3.5 | MIT | Entwicklung | https://github.com/tailwindlabs/tailwindcss |
 | @tailwindcss/turbopack | 4.3.5 | MIT | Entwicklung | https://github.com/tailwindlabs/tailwindcss |
@@ -57,11 +59,11 @@ Lizenzen am 2026-11-07 über die Hugging-Face-API geprüft.
 
 ## Transitive Abhängigkeiten (Prüfung 2026-11-07)
 
-Alle 703 Einträge aus `package-lock.json` geprüft (inkl. optionaler Plattform-Pakete). **Keine GPL, keine AGPL, kein Paket ohne Lizenzangabe.**
+Alle 799 Einträge aus `package-lock.json` geprüft (inkl. optionaler Plattform-Pakete). **Keine GPL, keine AGPL, kein Paket ohne Lizenzangabe.**
 
 | Lizenz | Anzahl | Bewertung |
 |---|---|---|
-| MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, BlueOak-1.0.0, CC0-1.0, Python-2.0 | 673 | ✅ erlaubt |
+| MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, BlueOak-1.0.0, CC0-1.0, Python-2.0 | 769 | ✅ erlaubt |
 | MIT AND Zlib (`pako`, über pdf-lib, nur in Tests) | 1 | ✅ erlaubt |
 | CC-BY-4.0 (`caniuse-lite`, Browserdaten) | 1 | ✅ erlaubt, Namensnennung ist im Paket enthalten |
 | AFL-2.1 OR BSD-3-Clause (`json-schema`) | 1 | ✅ wir nutzen es unter BSD-3-Clause |

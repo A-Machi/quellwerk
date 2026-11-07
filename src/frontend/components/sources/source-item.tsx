@@ -6,7 +6,9 @@ import { useState, useTransition } from "react";
 import type { SourceSummary } from "@/backend/sources/service";
 import { ConfirmDeleteDialog } from "@/frontend/components/common/confirm-delete-dialog";
 import { RenameDialog } from "@/frontend/components/common/rename-dialog";
+import { useWorkspace } from "@/frontend/components/notebook/workspace-context";
 import { Button } from "@/frontend/components/ui/button";
+import { Checkbox } from "@/frontend/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +35,7 @@ export function SourceItem({
   const [deleting, setDeleting] = useState(false);
   const [retrying, startRetry] = useTransition();
   const status = getSourceStatusView(source);
+  const { isSelected, toggle } = useWorkspace();
 
   return (
     <li
@@ -76,6 +79,14 @@ export function SourceItem({
           </Button>
         ) : null}
       </div>
+
+      <Checkbox
+        className="mt-1"
+        aria-label={`„${source.title}“ im Chat verwenden`}
+        disabled={source.status !== "ready"}
+        checked={source.status === "ready" && isSelected(source.id)}
+        onCheckedChange={(checked) => toggle(source.id, checked)}
+      />
 
       <DropdownMenu>
         <DropdownMenuTrigger

@@ -12,7 +12,9 @@ import { requireSession } from "@/backend/auth";
 import { getNotebook } from "@/backend/notebooks/service";
 import { listSources } from "@/backend/sources/service";
 import { AppHeader } from "@/frontend/components/app-header";
+import { ChatPanel } from "@/frontend/components/chat/chat-panel";
 import { NotebookShell } from "@/frontend/components/notebook/notebook-shell";
+import { WorkspaceProvider } from "@/frontend/components/notebook/workspace-context";
 import { NotebookTitle } from "@/frontend/components/notebooks/notebook-title";
 import { SourcePanel } from "@/frontend/components/sources/source-panel";
 import { Skeleton } from "@/frontend/components/ui/skeleton";
@@ -25,7 +27,11 @@ export default function NotebookPage({ params }: PageProps<"/notebooks/[id]">) {
   );
 }
 
-async function NotebookView({ params }: { params: PageProps<"/notebooks/[id]">["params"] }) {
+async function NotebookView({
+  params,
+}: {
+  params: PageProps<"/notebooks/[id]">["params"];
+}) {
   const { id } = await params;
   const { supabase } = await requireSession();
   const notebook = await getNotebook(supabase, id);
@@ -33,29 +39,32 @@ async function NotebookView({ params }: { params: PageProps<"/notebooks/[id]">["
   const sources = await listSources(supabase, notebook.id);
 
   return (
-    <NotebookShell
-      header={
-        <AppHeader signOutAction={signOutAction}>
-          <NotebookTitle
-            key={notebook.title}
+    <WorkspaceProvider notebookId={notebook.id} sources={sources}>
+      <NotebookShell
+        chat={<ChatPanel />}
+        header={
+          <AppHeader signOutAction={signOutAction}>
+            <NotebookTitle
+              key={notebook.title}
+              notebookId={notebook.id}
+              title={notebook.title}
+              renameAction={renameNotebookAction}
+            />
+          </AppHeader>
+        }
+        sources={
+          <SourcePanel
             notebookId={notebook.id}
-            title={notebook.title}
-            renameAction={renameNotebookAction}
+            sources={sources}
+            actions={{
+              createUpload: createUploadAction,
+              rename: renameSourceAction,
+              remove: deleteSourceAction,
+            }}
           />
-        </AppHeader>
-      }
-      sources={
-        <SourcePanel
-          notebookId={notebook.id}
-          sources={sources}
-          actions={{
-            createUpload: createUploadAction,
-            rename: renameSourceAction,
-            remove: deleteSourceAction,
-          }}
-        />
-      }
-    />
+        }
+      />
+    </WorkspaceProvider>
   );
 }
 
