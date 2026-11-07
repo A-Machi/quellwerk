@@ -41,22 +41,24 @@ export function NotebookShell({ title }: { title: string }) {
         <ResizableHandle withHandle />
 
         <ResizablePanel defaultSize="50%" minSize="30%">
-          <Column title="Chat">
-            <EmptyState
-              icon={<Sparkles />}
-              text="Stelle eine Frage zu deinen Quellen. Die Antwort nennt, woher jede Aussage stammt."
-            />
-          </Column>
-          <form className="flex gap-2 border-t p-3">
-            <Textarea
-              placeholder="Wähle zuerst eine Quelle aus"
-              className="min-h-10 resize-none"
-              disabled
-            />
-            <Button type="submit" size="icon" aria-label="Senden" disabled>
-              <Send />
-            </Button>
-          </form>
+          <div className="flex h-full flex-col">
+            <Column title="Chat">
+              <EmptyState
+                icon={<Sparkles />}
+                text="Stelle eine Frage zu deinen Quellen. Die Antwort nennt, woher jede Aussage stammt."
+              />
+            </Column>
+            <form className="flex shrink-0 gap-2 border-t p-3">
+              <Textarea
+                placeholder="Wähle zuerst eine Quelle aus"
+                className="min-h-10 resize-none"
+                disabled
+              />
+              <Button type="submit" size="icon" aria-label="Senden" disabled>
+                <Send />
+              </Button>
+            </form>
+          </div>
         </ResizablePanel>
 
         <ResizableHandle withHandle />
@@ -76,7 +78,7 @@ export function NotebookShell({ title }: { title: string }) {
 
 function Column({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="flex h-full min-h-0 flex-col">
+    <section className="flex h-full min-h-0 flex-1 flex-col">
       <h2 className="flex h-11 shrink-0 items-center border-b px-4 text-sm font-medium">
         {title}
       </h2>
