@@ -6,6 +6,7 @@ import { chunkPages, type ChunkOptions } from "@/backend/ingestion/chunker";
 import {
   describeIngestionError,
   FileMissingError,
+  INGESTION_MESSAGES,
   ScannedPdfError,
   TooManyPagesError,
 } from "@/backend/ingestion/errors";
@@ -72,10 +73,12 @@ export async function processSource(deps: IngestionDeps, id: string): Promise<Pr
     if (error) throw error;
     return { status: "ready", pageCount, chunkCount };
   } catch (error) {
-    if (!(error instanceof ScannedPdfError || error instanceof TooManyPagesError)) {
+    const message = describeIngestionError(error);
+    // Erwartbare Fehler (Scan, kaputtes PDF, Tageslimit ...) stehen schon als Meldung
+    // an der Quelle. Ins Log gehören nur unerwartete Fehler.
+    if (message === INGESTION_MESSAGES.generic) {
       console.error(`Verarbeitung von Quelle ${sourceId} fehlgeschlagen`, error);
     }
-    const message = describeIngestionError(error);
     await supabase.from("chunks").delete().eq("source_id", sourceId);
     await supabase.from("sources").update({ status: "failed", error: message }).eq("id", sourceId);
     return { status: "failed", error: message };

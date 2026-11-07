@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
 
 import { INGESTION_MESSAGES } from "@/backend/ingestion/errors";
 import { processSource } from "@/backend/ingestion/pipeline";
@@ -23,6 +23,16 @@ describe("PDF-Verarbeitung", () => {
 
   afterAll(async () => {
     await user?.cleanup();
+  });
+
+  // Die Tests simulieren absichtlich Fehler. Log-Ausgaben werden abgefangen und geprüft,
+  // statt das Build-Log mit erwarteten Stack-Traces zu füllen.
+  let errorLog: MockInstance<typeof console.error>;
+  beforeEach(() => {
+    errorLog = vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   async function upload(content: Uint8Array | string, fileName = "test.pdf") {
@@ -111,6 +121,7 @@ describe("PDF-Verarbeitung", () => {
   it("US-04: meldet kaputte Dateien verständlich", async () => {
     const sourceId = await upload("%PDF-1.4 das ist kein echtes PDF", "kaputt.pdf");
     expect(await run(sourceId)).toEqual({ status: "failed", error: INGESTION_MESSAGES.invalid });
+    expect(errorLog).not.toHaveBeenCalled();
   });
 
   it("US-04: meldet eine fehlende Datei (Upload abgebrochen)", async () => {
@@ -132,6 +143,8 @@ describe("PDF-Verarbeitung", () => {
 
     expect(result).toEqual({ status: "failed", error: INGESTION_MESSAGES.quota });
     expect(await chunksOf(sourceId)).toEqual([]);
+    // Erwartbarer Fehler: steht an der Quelle, gehört nicht ins Fehler-Log
+    expect(errorLog).not.toHaveBeenCalled();
   });
 
   it("US-04: 'Erneut verarbeiten' nach einem Fehler klappt und verdoppelt keine Chunks", async () => {
@@ -145,6 +158,9 @@ describe("PDF-Verarbeitung", () => {
 
     expect((await run(sourceId, flaky)).status).toBe("failed");
     expect((await status(sourceId)).error).toBe(INGESTION_MESSAGES.generic);
+    // Unerwarteter Fehler: wird mit Quellen-ID geloggt
+    expect(errorLog).toHaveBeenCalledTimes(1);
+    expect(errorLog.mock.calls[0][0]).toContain(sourceId);
 
     const retry = await run(sourceId, flaky);
     expect(retry.status).toBe("ready");
