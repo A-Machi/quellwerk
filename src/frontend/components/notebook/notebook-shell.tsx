@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Plus, Send, Sparkles } from "lucide-react";
+import { Send, Sparkles } from "lucide-react";
 
 import { Button } from "@/frontend/components/ui/button";
 import {
@@ -12,30 +12,21 @@ import { ScrollArea } from "@/frontend/components/ui/scroll-area";
 import { Textarea } from "@/frontend/components/ui/textarea";
 
 // 3-Spalten-Layout eines Notebooks: Quellen · Chat · Studio.
-// Noch ohne Daten, die Spalten werden in den User Stories gefüllt.
-export function NotebookShell({ title }: { title: string }) {
+// Kopfzeile und Quellen-Spalte kommen als fertige Elemente von der Seite.
+export function NotebookShell({
+  header,
+  sources,
+}: {
+  header: React.ReactNode;
+  sources: React.ReactNode;
+}) {
   return (
     <div className="flex h-dvh flex-col">
-      <header className="flex h-14 shrink-0 items-center border-b px-4">
-        <span className="font-semibold">Quellwerk</span>
-        <span className="mx-2 text-muted-foreground">/</span>
-        <span className="truncate text-muted-foreground">{title}</span>
-      </header>
+      {header}
 
       <ResizablePanelGroup orientation="horizontal" className="min-h-0 flex-1">
         <ResizablePanel defaultSize="25%" minSize="15%">
-          <Column title="Quellen">
-            <div className="p-3">
-              <Button variant="outline" className="w-full" disabled>
-                <Plus />
-                Quelle hinzufügen
-              </Button>
-            </div>
-            <EmptyState
-              icon={<FileText />}
-              text="Noch keine Quellen. Lade ein PDF hoch, um zu starten."
-            />
-          </Column>
+          <Column title="Quellen">{sources}</Column>
         </ResizablePanel>
 
         <ResizableHandle withHandle />
@@ -50,7 +41,7 @@ export function NotebookShell({ title }: { title: string }) {
             </Column>
             <form className="flex shrink-0 gap-2 border-t p-3">
               <Textarea
-                placeholder="Wähle zuerst eine Quelle aus"
+                placeholder="Der Chat kommt in Sprint 3"
                 className="min-h-10 resize-none"
                 disabled
               />
