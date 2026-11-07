@@ -2,15 +2,16 @@ import "server-only";
 
 import { assertEmbeddings, type Embedder } from "@/backend/ai/embeddings";
 import { UserFacingError } from "@/backend/errors";
-import { chunkPages, type ChunkOptions } from "@/backend/ingestion/chunker";
+import { chunkPages, type ChunkOptions, type TextPage } from "@/backend/ingestion/chunker";
 import {
   describeIngestionError,
+  EmptyTextError,
   FileMissingError,
   INGESTION_MESSAGES,
   ScannedPdfError,
   TooManyPagesError,
 } from "@/backend/ingestion/errors";
-import { extractPdfPages, isLikelyScanned } from "@/backend/ingestion/extract-pdf";
+import { extractPdfPages, isLikelyScanned, normalizePageText } from "@/backend/ingestion/extract-pdf";
 import { parseId } from "@/backend/notebooks/service";
 import { SOURCES_BUCKET, type AppSupabaseClient, type SourceStatus } from "@/backend/supabase/types";
 
@@ -25,11 +26,11 @@ export type IngestionDeps = {
 };
 
 export type ProcessResult =
-  | { status: "ready"; pageCount: number; chunkCount: number }
+  | { status: "ready"; pageCount: number | null; chunkCount: number }
   | { status: "failed"; error: string }
   | { status: Exclude<SourceStatus, "ready" | "failed">; skipped: true };
 
-// Verarbeitet eine hochgeladene Quelle: PDF laden, Text seitenweise extrahieren,
+// Verarbeitet eine hochgeladene Quelle: Datei laden, Text (bei PDFs seitenweise) extrahieren,
 // in Chunks teilen, Embeddings erzeugen und speichern.
 // Status: uploaded/failed -> processing -> ready | failed
 export async function processSource(deps: IngestionDeps, id: string): Promise<ProcessResult> {
@@ -42,7 +43,7 @@ export async function processSource(deps: IngestionDeps, id: string): Promise<Pr
     .update({ status: "processing", error: null })
     .eq("id", sourceId)
     .in("status", ["uploaded", "failed"])
-    .select("id, storage_path");
+    .select("id, storage_path, type");
   if (claimError) throw claimError;
 
   const source = claimed[0];
@@ -59,13 +60,13 @@ export async function processSource(deps: IngestionDeps, id: string): Promise<Pr
         .from("chunks")
         .select("id", { count: "exact", head: true })
         .eq("source_id", sourceId);
-      return { status: "ready", pageCount: current.page_count ?? 0, chunkCount: count ?? 0 };
+      return { status: "ready", pageCount: current.page_count, chunkCount: count ?? 0 };
     }
     return { status: "processing", skipped: true };
   }
 
   try {
-    const { pageCount, chunkCount } = await ingest(deps, sourceId, source.storage_path);
+    const { pageCount, chunkCount } = await ingest(deps, sourceId, source);
     const { error } = await supabase
       .from("sources")
       .update({ status: "ready", page_count: pageCount, error: null })
@@ -85,22 +86,33 @@ export async function processSource(deps: IngestionDeps, id: string): Promise<Pr
   }
 }
 
-async function ingest(
-  { supabase, embed, chunkOptions }: IngestionDeps,
-  sourceId: string,
-  storagePath: string,
-): Promise<{ pageCount: number; chunkCount: number }> {
-  const { data: file, error: downloadError } = await supabase.storage
-    .from(SOURCES_BUCKET)
-    .download(storagePath);
-  if (downloadError || !file) throw new FileMissingError(downloadError);
+// PDFs: Text seitenweise. Text-Quellen (US-08): ein Block ohne Seitenzahl.
+async function readPages(file: Blob, type: string): Promise<{ pages: TextPage[]; pageCount: number | null }> {
+  if (type === "text") {
+    const text = normalizePageText(await file.text());
+    if (!text) throw new EmptyTextError();
+    return { pages: [{ pageNumber: null, text }], pageCount: null };
+  }
 
   const pdf = await extractPdfPages(new Uint8Array(await file.arrayBuffer()));
   if (pdf.totalPages > MAX_PDF_PAGES) throw new TooManyPagesError(pdf.totalPages, MAX_PDF_PAGES);
   if (isLikelyScanned(pdf)) throw new ScannedPdfError();
+  return { pages: pdf.pages, pageCount: pdf.totalPages };
+}
 
-  const chunks = chunkPages(pdf.pages, chunkOptions);
-  if (chunks.length === 0) throw new ScannedPdfError();
+async function ingest(
+  { supabase, embed, chunkOptions }: IngestionDeps,
+  sourceId: string,
+  source: { storage_path: string; type: string },
+): Promise<{ pageCount: number | null; chunkCount: number }> {
+  const { data: file, error: downloadError } = await supabase.storage
+    .from(SOURCES_BUCKET)
+    .download(source.storage_path);
+  if (downloadError || !file) throw new FileMissingError(downloadError);
+
+  const { pages, pageCount } = await readPages(file, source.type);
+  const chunks = chunkPages(pages, chunkOptions);
+  if (chunks.length === 0) throw source.type === "text" ? new EmptyTextError() : new ScannedPdfError();
 
   const embeddings = await embed(chunks.map((chunk) => chunk.content));
   assertEmbeddings(embeddings, chunks.length);
@@ -122,5 +134,5 @@ async function ingest(
     if (error) throw error;
   }
 
-  return { pageCount: pdf.totalPages, chunkCount: chunks.length };
+  return { pageCount, chunkCount: chunks.length };
 }

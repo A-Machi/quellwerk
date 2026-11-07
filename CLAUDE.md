@@ -81,7 +81,7 @@ Weitere Dienste nur nach Rückfrage beim Nutzer.
 Modellnamen bei Cloudflare ändern sich, und Modelle werden abgeschaltet (Feld `planned_deprecation_date` in der Modellsuche der API). Vor dem Wechsel die aktuelle Modellliste prüfen.
 
 **Hinweise zu gpt-oss-20b (aus dem Test):**
-- Ist ein Reasoning-Modell. `reasoning_effort` auf `low` setzen (im AI SDK über `providerOptions`), sonst steigen Wartezeit und Verbrauch.
+- Ist ein Reasoning-Modell. Im AI SDK v7 mit der Aufruf-Option `reasoning: "low"` steuern (wird zu `reasoning_effort`), sonst steigen Wartezeit und Verbrauch. Umgesetzt in `src/backend/chat/llm.ts`.
 - Eine realistische RAG-Frage (ca. 7.000 Token Input) kostet ca. 127 Neurons und 2 s. Free Tier = 10.000 Neurons pro Tag, also ca. 75 Fragen. Jede Antwort meldet den Verbrauch in `usage.neurons`.
 - Zitat-Marker robust parsen: Modelle schreiben `[1]`, manche auch `【1】`.
 

@@ -26,7 +26,15 @@ export class FileMissingError extends Error {
   }
 }
 
+export class EmptyTextError extends Error {
+  constructor() {
+    super("Text ist leer");
+    this.name = "EmptyTextError";
+  }
+}
+
 export const INGESTION_MESSAGES = {
+  empty: "Der Text ist leer.",
   scanned: "Gescanntes PDF ohne Text, wird noch nicht unterstützt.",
   invalid: "Die Datei ist kein gültiges PDF oder beschädigt.",
   missing: "Die Datei wurde nicht gefunden. Bitte lade sie erneut hoch.",
@@ -59,6 +67,7 @@ export function describeIngestionError(error: unknown): string {
   if (error instanceof ScannedPdfError) return INGESTION_MESSAGES.scanned;
   if (error instanceof InvalidPdfError) return INGESTION_MESSAGES.invalid;
   if (error instanceof FileMissingError) return INGESTION_MESSAGES.missing;
+  if (error instanceof EmptyTextError) return INGESTION_MESSAGES.empty;
   if (error instanceof TooManyPagesError) {
     return `Das PDF hat ${error.pages} Seiten, erlaubt sind höchstens ${error.maxPages}.`;
   }

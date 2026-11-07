@@ -149,7 +149,7 @@ Als Nutzer möchte ich per Checkbox wählen, welche Quellen der Chat nutzt, dami
 
 #### US-08 – Text als Quelle einfügen · S · Should
 Als Nutzer möchte ich kopierten Text als Quelle einfügen, damit ich auch Inhalte ohne PDF nutzen kann.
-- [ ] Dialog mit Titel und Textfeld, danach gleiche Verarbeitung wie US-04 (ohne Seitenzahlen)
+- [x] Dialog mit Titel und Textfeld, danach gleiche Verarbeitung wie US-04 (ohne Seitenzahlen)
 
 *Braucht:* US-04
 
@@ -175,9 +175,9 @@ Als Nutzer möchte ich klar erfahren, wenn die Quellen meine Frage nicht beantwo
 
 #### US-11 – Chatverlauf bleibt erhalten · M · Must
 Als Nutzer möchte ich nach dem Neuladen meinen bisherigen Chat sehen und Folgefragen stellen können.
-- [ ] Nachrichten inkl. Zitaten werden in `messages` gespeichert
-- [ ] Folgefragen („Und was steht zu Punkt 2?“) werden vor der Suche mit dem Verlauf zu einer eigenständigen Frage umformuliert
-- [ ] Button „Chat leeren“
+- [x] Nachrichten inkl. Zitaten werden in `messages` gespeichert
+- [x] Folgefragen („Und was steht zu Punkt 2?“) werden vor der Suche mit dem Verlauf zu einer eigenständigen Frage umformuliert
+- [x] Button „Chat leeren“
 
 *Braucht:* US-09
 
@@ -193,8 +193,8 @@ Als Nutzer möchte ich zu jeder Aussage sehen, aus welcher Quelle sie stammt, da
 
 #### US-13 – Zur zitierten Stelle springen · M · Must
 Als Nutzer möchte ich auf ein Zitat klicken und die Stelle im PDF sehen, damit ich den Kontext lesen kann.
-- [ ] Klick öffnet einen PDF-Viewer (react-pdf) auf der richtigen Seite, PDF wird über eine kurzlebige Signed URL aus dem Storage geladen
-- [ ] Zitierter Textausschnitt ist sichtbar hervorgehoben (Should, Seite reicht für Must)
+- [x] Klick öffnet einen PDF-Viewer (react-pdf) auf der richtigen Seite, PDF wird über eine kurzlebige Signed URL aus dem Storage geladen
+- [x] Zitierter Textausschnitt ist sichtbar hervorgehoben (Should, Seite reicht für Must)
 
 *Braucht:* US-12
 
@@ -212,7 +212,7 @@ Sprint 4  Fertigstellen     US-11, US-13, US-08 (Should)
 
 Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen.
 
-**Stand 2026-11-07:** Sprint 0 bis 3 erledigt (inkl. US-07 aus Sprint 2). Tests: 80 Unit-Tests (`npm test`) und 42 Integrationstests gegen Supabase (`npm run test:integration`), beide laufen vor jedem Vercel-Deployment (`npm run verify`). Dazu 8 Tests mit echtem Workers AI (`RUN_AI_TESTS=1`), u. a. die 5 Testfragen für US-10.
+**Stand 2026-11-07:** MVP komplett, Sprint 0 bis 4 erledigt, dazu Dark Mode. Tests: 91 Unit-Tests (`npm test`) und 54 Integrationstests gegen Supabase (`npm run test:integration`), beide laufen vor jedem Vercel-Deployment (`npm run verify`). Dazu 9 Tests mit echtem Workers AI (`RUN_AI_TESTS=1`), u. a. die 5 Testfragen für US-10 und eine Folgefrage für US-11.
 
 ---
 
@@ -232,6 +232,6 @@ Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen
 |---|---|---|---|
 | 1 | Projektname | – | ✅ Quellwerk |
 | 2 | Chat-Modell | gpt-oss-20b · Mistral Small 3.1 · weitere | ✅ gpt-oss-20b |
-| 3 | Text-Quellen im MVP | Ja (US-08) · später | offen (Empfehlung: ja, kleiner Aufwand) |
+| 3 | Text-Quellen im MVP | Ja (US-08) · später | ✅ Ja |
 | 4 | Eigene Projekt-Lizenz | MIT · Apache-2.0 | ✅ MIT |
 | 5 | Supabase-Region | Frankfurt · andere EU-Region | ✅ Frankfurt |

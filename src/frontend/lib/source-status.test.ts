@@ -54,3 +54,10 @@ describe("shouldPollSources", () => {
     expect(shouldPollSources([{ status: "uploaded", createdAt: at(STALE_UPLOAD_MS + 1) }], NOW)).toBe(false);
   });
 });
+
+describe("Text-Quellen (US-08)", () => {
+  it("zeigt bei fertigen Text-Quellen 'Text' statt einer Seitenzahl", () => {
+    expect(getSourceStatusView({ ...base, type: "text", status: "ready", pageCount: null }, NOW).label).toBe("Text");
+    expect(getSourceStatusView({ ...base, type: "pdf", status: "ready", pageCount: 3 }, NOW).label).toBe("3 Seiten");
+  });
+});

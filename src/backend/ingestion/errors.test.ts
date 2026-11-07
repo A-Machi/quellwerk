@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   describeIngestionError,
+  EmptyTextError,
   FileMissingError,
   INGESTION_MESSAGES,
   isQuotaExceededError,
@@ -38,6 +39,7 @@ describe("describeIngestionError", () => {
     expect(describeIngestionError(new ScannedPdfError())).toBe(INGESTION_MESSAGES.scanned);
     expect(describeIngestionError(new InvalidPdfError())).toBe(INGESTION_MESSAGES.invalid);
     expect(describeIngestionError(new FileMissingError())).toBe(INGESTION_MESSAGES.missing);
+    expect(describeIngestionError(new EmptyTextError())).toBe(INGESTION_MESSAGES.empty);
     expect(describeIngestionError(quotaError)).toBe(INGESTION_MESSAGES.quota);
     expect(describeIngestionError(new TooManyPagesError(412, 300))).toBe(
       "Das PDF hat 412 Seiten, erlaubt sind höchstens 300.",

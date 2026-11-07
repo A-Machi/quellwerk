@@ -2,10 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildCitations,
+  buildHistoryMessages,
   buildInstructions,
+  buildRewriteInstructions,
+  buildRewritePrompt,
   buildUserPrompt,
+  cleanRewrittenQuestion,
   makeExcerpt,
   NO_ANSWER,
+  stripCitationMarkers,
   type RetrievedChunk,
 } from "@/backend/chat/prompt";
 
@@ -60,5 +65,45 @@ describe("buildInstructions", () => {
     expect(instructions).toContain("ausschließlich anhand der nummerierten Quellen");
     expect(instructions).toContain("[1]");
     expect(instructions).toContain(NO_ANSWER);
+  });
+});
+
+describe("Verlauf und Folgefragen (US-11)", () => {
+  it("entfernt Zitat-Marker aus früheren Antworten", () => {
+    expect(stripCitationMarkers("Der Umsatz stieg [1]. Grund: das Café [2, 3] 【4†L1】.")).toBe(
+      "Der Umsatz stieg. Grund: das Café.",
+    );
+    expect(stripCitationMarkers("Siehe [Link](https://example.com)")).toBe("Siehe [Link](https://example.com)");
+  });
+
+  it("gibt dem Modell höchstens die letzten 6 Nachrichten ohne Marker mit", () => {
+    const history = Array.from({ length: 10 }, (_, i) => ({
+      role: (i % 2 === 0 ? "user" : "assistant") as "user" | "assistant",
+      content: `Nachricht ${i} [1]`,
+    }));
+    const result = buildHistoryMessages(history);
+    expect(result).toHaveLength(6);
+    expect(result[0]).toEqual({ role: "user", content: "Nachricht 4" });
+    expect(result.at(-1)).toEqual({ role: "assistant", content: "Nachricht 9" });
+  });
+
+  it("baut den Prompt zum Umformulieren aus Verlauf und letzter Frage", () => {
+    const prompt = buildRewritePrompt(
+      [
+        { role: "user", content: "Wie hoch war der Umsatz?" },
+        { role: "assistant", content: "4,2 Mio. Euro [1]." },
+      ],
+      "Und warum?",
+    );
+    expect(prompt).toBe("Gesprächsverlauf:\nNutzer: Wie hoch war der Umsatz?\nAssistent: 4,2 Mio. Euro.\n\nLetzte Frage: Und warum?");
+    expect(buildRewriteInstructions()).toContain("ohne den Gesprächsverlauf verständlich");
+  });
+
+  it("säubert die umformulierte Frage und fällt bei Unsinn auf das Original zurück", () => {
+    expect(cleanRewrittenQuestion('Umformulierte Frage: "Warum stieg der Umsatz 2025?"', "Und warum?")).toBe(
+      "Warum stieg der Umsatz 2025?",
+    );
+    expect(cleanRewrittenQuestion("   ", "Und warum?")).toBe("Und warum?");
+    expect(cleanRewrittenQuestion("x".repeat(600), "Und warum?")).toBe("Und warum?");
   });
 });

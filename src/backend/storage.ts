@@ -2,9 +2,14 @@ import "server-only";
 
 import { SOURCES_BUCKET, type AppSupabaseClient } from "@/backend/supabase/types";
 
-// Pfade im Bucket: {user_id}/{notebook_id}/{source_id}.pdf
-export function sourceStoragePath(userId: string, notebookId: string, sourceId: string): string {
-  return `${userId}/${notebookId}/${sourceId}.pdf`;
+// Pfade im Bucket: {user_id}/{notebook_id}/{source_id}.pdf bzw. .txt
+export function sourceStoragePath(
+  userId: string,
+  notebookId: string,
+  sourceId: string,
+  extension: "pdf" | "txt" = "pdf",
+): string {
+  return `${userId}/${notebookId}/${sourceId}.${extension}`;
 }
 
 export async function removeStorageFolder(

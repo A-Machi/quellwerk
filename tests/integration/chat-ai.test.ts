@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createWorkersAiEmbedder } from "@/backend/ai/embeddings";
 import { createWorkersAiLlm } from "@/backend/chat/llm";
 import { NO_ANSWER } from "@/backend/chat/prompt";
-import { prepareAnswer } from "@/backend/chat/service";
+import { clearMessages, prepareAnswer } from "@/backend/chat/service";
 import { createNotebook } from "@/backend/notebooks/service";
 import { citedNumbers } from "@/frontend/lib/citations";
 import { collectText, createReadyPdfSource } from "@tests/helpers/fixtures";
@@ -58,5 +58,20 @@ describe.runIf(process.env.RUN_AI_TESTS === "1")("Chat mit echtem Modell", () =>
     const answer = await prepareAnswer(deps(), notebookId, { question, sourceIds: [sourceId] });
     const text = await collectText(answer.stream);
     expect(text).toContain(NO_ANSWER.replace(/\.$/, ""));
+  });
+
+  it("US-11: versteht eine Folgefrage im Zusammenhang des Verlaufs", async () => {
+    await clearMessages(user.client, notebookId);
+    const first = await prepareAnswer(deps(), notebookId, {
+      question: "Wie hoch war der Umsatz der Bäckerei 2025?",
+      sourceIds: [sourceId],
+    });
+    await first.finish(await collectText(first.stream));
+
+    const followUp = await prepareAnswer(deps(), notebookId, { question: "Und warum ist er gestiegen?", sourceIds: [sourceId] });
+    const text = await collectText(followUp.stream);
+
+    expect(followUp.searchQuery).toMatch(/Umsatz/i);
+    expect(text).toMatch(/Café|Cafe/);
   });
 });

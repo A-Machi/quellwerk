@@ -10,3 +10,16 @@ export function checkPdfFile(file: { name: string; size: number; type: string })
   if (file.size > MAX_UPLOAD_BYTES) return `„${file.name}“ ist größer als 50 MB.`;
   return null;
 }
+
+// Grenzen für Text-Quellen, gleich wie parseTextSource im Backend
+export const MAX_TEXT_SOURCE_CHARS = 200_000;
+const MIN_TEXT_SOURCE_CHARS = 20;
+
+export function checkTextSource(input: { title: string; text: string }): string | null {
+  if (!input.title.trim()) return "Bitte gib einen Titel ein.";
+  if (input.title.trim().length > 300) return "Der Titel darf höchstens 300 Zeichen lang sein.";
+  const length = input.text.trim().length;
+  if (length < MIN_TEXT_SOURCE_CHARS) return `Der Text muss mindestens ${MIN_TEXT_SOURCE_CHARS} Zeichen lang sein.`;
+  if (length > MAX_TEXT_SOURCE_CHARS) return "Der Text ist zu lang.";
+  return null;
+}

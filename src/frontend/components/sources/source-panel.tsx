@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Upload } from "lucide-react";
+import { ClipboardPaste, FileText, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import type {
 } from "@/backend/sources/service";
 import { useWorkspace } from "@/frontend/components/notebook/workspace-context";
 import { SourceItem } from "@/frontend/components/sources/source-item";
+import { TextSourceDialog } from "@/frontend/components/sources/text-source-dialog";
 import { Button } from "@/frontend/components/ui/button";
 import { Checkbox } from "@/frontend/components/ui/checkbox";
 import { shouldPollSources } from "@/frontend/lib/source-status";
@@ -27,6 +28,10 @@ export type SourceActions = {
     notebookId: string,
     file: PdfUploadRequest,
   ) => Promise<Result<PdfUploadTicket>>;
+  createText: (
+    notebookId: string,
+    input: { title: string; text: string },
+  ) => Promise<Result<{ sourceId: string }>>;
   rename: (id: string, title: string) => Promise<Result>;
   remove: (id: string) => Promise<Result>;
 };
@@ -60,6 +65,7 @@ export function SourcePanel({
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(0);
+  const [textDialogOpen, setTextDialogOpen] = useState(false);
 
   // US-05: Status ohne Neuladen aktualisieren, solange etwas in Arbeit ist.
   const poll = uploading > 0 || shouldPollSources(sources);
@@ -148,17 +154,35 @@ export function SourcePanel({
             event.target.value = "";
           }}
         />
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => inputRef.current?.click()}
-        >
-          <Upload />
-          PDF hochladen
-        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="outline" onClick={() => inputRef.current?.click()}>
+            <Upload />
+            PDF hochladen
+          </Button>
+          <Button variant="outline" onClick={() => setTextDialogOpen(true)}>
+            <ClipboardPaste />
+            Text einfügen
+          </Button>
+        </div>
         <p className="mt-2 text-center text-xs text-muted-foreground">
-          oder hierher ziehen · max. 50 MB pro Datei
+          PDFs auch hierher ziehen · max. 50 MB pro Datei
         </p>
+        <TextSourceDialog
+          open={textDialogOpen}
+          onOpenChange={setTextDialogOpen}
+          onSubmit={async (input) => {
+            const result = await actions.createText(notebookId, input);
+            if (!result.ok) {
+              toast.error(result.error);
+              return false;
+            }
+            router.refresh();
+            requestProcessing(result.data.sourceId)
+              .catch((error: Error) => toast.error(error.message))
+              .finally(() => router.refresh());
+            return true;
+          }}
+        />
       </div>
 
       {sources.length === 0 ? (

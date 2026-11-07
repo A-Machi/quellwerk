@@ -1,6 +1,16 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, FileText, Loader2, MoreVertical, Pencil, RotateCw, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  ClipboardPaste,
+  FileText,
+  Loader2,
+  MoreVertical,
+  Pencil,
+  RotateCw,
+  Trash2,
+} from "lucide-react";
 import { useState, useTransition } from "react";
 
 import type { SourceSummary } from "@/backend/sources/service";
@@ -48,6 +58,8 @@ export function SourceItem({
           <Loader2 className="animate-spin" aria-hidden />
         ) : status.tone === "error" ? (
           <AlertCircle className="text-destructive" aria-hidden />
+        ) : source.type === "text" ? (
+          <ClipboardPaste aria-hidden />
         ) : (
           <FileText aria-hidden />
         )}
@@ -60,10 +72,14 @@ export function SourceItem({
         <p
           className={cn(
             "flex items-center gap-1 text-xs",
-            status.tone === "error" ? "text-destructive" : "text-muted-foreground",
+            status.tone === "error"
+              ? "text-destructive"
+              : "text-muted-foreground",
           )}
         >
-          {status.tone === "ready" ? <CheckCircle2 className="size-3" aria-hidden /> : null}
+          {status.tone === "ready" ? (
+            <CheckCircle2 className="size-3" aria-hidden />
+          ) : null}
           {status.label}
         </p>
         {status.canRetry ? (
@@ -106,7 +122,10 @@ export function SourceItem({
             <Pencil />
             Umbenennen
           </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive" onClick={() => setDeleting(true)}>
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => setDeleting(true)}
+          >
             <Trash2 />
             Löschen
           </DropdownMenuItem>

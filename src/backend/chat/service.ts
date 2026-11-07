@@ -6,15 +6,22 @@ import type { Embedder } from "@/backend/ai/embeddings";
 import type { ChatLlm } from "@/backend/chat/llm";
 import {
   buildCitations,
+  buildHistoryMessages,
   buildInstructions,
+  buildRewriteInstructions,
+  buildRewritePrompt,
   buildUserPrompt,
+  cleanRewrittenQuestion,
+  HISTORY_LIMIT,
   NO_ANSWER,
   type Citation,
+  type HistoryMessage,
   type RetrievedChunk,
 } from "@/backend/chat/prompt";
 import { UserFacingError } from "@/backend/errors";
 import { isQuotaExceededError } from "@/backend/ingestion/errors";
-import { getNotebook } from "@/backend/notebooks/service";
+import { getNotebook, parseId } from "@/backend/notebooks/service";
+import type { Json } from "@/backend/supabase/database.types";
 import type { AppSupabaseClient } from "@/backend/supabase/types";
 
 export const MAX_QUESTION_LENGTH = 2000;
@@ -100,17 +107,96 @@ export async function retrieveChunks(
   }));
 }
 
+export type StoredMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  citations: Citation[];
+  createdAt: string;
+};
+
+// US-11: gespeicherter Chatverlauf eines Notebooks, älteste Nachricht zuerst
+export async function listMessages(
+  supabase: AppSupabaseClient,
+  notebookId: string,
+  limit = 100,
+): Promise<StoredMessage[]> {
+  const { data, error } = await supabase
+    .from("messages")
+    .select("id, role, content, citations, created_at")
+    .eq("notebook_id", parseId(notebookId, "Notebook"))
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+
+  return data.reverse().map((row) => ({
+    id: row.id,
+    role: row.role as StoredMessage["role"],
+    content: row.content,
+    citations: Array.isArray(row.citations) ? (row.citations as unknown as Citation[]) : [],
+    createdAt: row.created_at,
+  }));
+}
+
+export async function clearMessages(supabase: AppSupabaseClient, notebookId: string): Promise<void> {
+  const notebook = await getNotebook(supabase, notebookId);
+  if (!notebook) throw new UserFacingError("Notebook wurde nicht gefunden.");
+  const { error } = await supabase.from("messages").delete().eq("notebook_id", notebook.id);
+  if (error) throw error;
+}
+
+async function saveMessage(
+  supabase: AppSupabaseClient,
+  notebookId: string,
+  role: StoredMessage["role"],
+  content: string,
+  citations: Citation[] = [],
+): Promise<string> {
+  const { data, error } = await supabase
+    .from("messages")
+    .insert({ notebook_id: notebookId, role, content, citations: citations as unknown as Json })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return data.id;
+}
+
+// Folgefragen mit dem Verlauf eigenständig machen. Schlägt das fehl, wird mit der
+// Originalfrage gesucht, statt die ganze Antwort scheitern zu lassen.
+export async function rewriteQuestion(
+  llm: ChatLlm,
+  history: HistoryMessage[],
+  question: string,
+): Promise<string> {
+  if (history.length === 0) return question;
+  try {
+    const rewritten = await llm.complete({
+      instructions: buildRewriteInstructions(),
+      messages: [{ role: "user", content: buildRewritePrompt(history, question) }],
+    });
+    return cleanRewrittenQuestion(rewritten, question);
+  } catch (error) {
+    if (isQuotaExceededError(error)) throw error;
+    console.error("Umformulieren der Folgefrage fehlgeschlagen", error);
+    return question;
+  }
+}
+
 export type PreparedAnswer = {
   citations: Citation[];
+  // Frage, mit der tatsächlich gesucht wurde (bei Folgefragen umformuliert)
+  searchQuery: string;
   stream: AsyncIterable<string>;
+  // Speichert die fertige Antwort im Verlauf und liefert ihre ID.
+  finish: (answer: string) => Promise<string>;
 };
 
 async function* single(text: string): AsyncIterable<string> {
   yield text;
 }
 
-// US-09: Frage einbetten, passende Chunks aus den ausgewählten Quellen suchen,
-// nummeriert ans Modell geben und die Antwort streamen.
+// US-09/US-11: Frage speichern, Folgefrage umformulieren, passende Chunks aus den
+// ausgewählten Quellen suchen, mit Verlauf ans Modell geben und die Antwort streamen.
 export async function prepareAnswer(
   deps: ChatDeps,
   notebookId: string,
@@ -125,14 +211,28 @@ export async function prepareAnswer(
     throw new UserFacingError("Keine der ausgewählten Quellen ist fertig verarbeitet.");
   }
 
-  const chunks = await retrieveChunks(deps, request.question, sourceIds);
-  if (chunks.length === 0) return { citations: [], stream: single(NO_ANSWER) };
+  const history = (await listMessages(deps.supabase, notebook.id, HISTORY_LIMIT)).map(
+    ({ role, content }) => ({ role, content }),
+  );
+  await saveMessage(deps.supabase, notebook.id, "user", request.question);
+
+  const searchQuery = await rewriteQuestion(deps.llm, history, request.question);
+  const chunks = await retrieveChunks(deps, searchQuery, sourceIds);
+  const citations = buildCitations(chunks);
+  const finish = (answer: string) => saveMessage(deps.supabase, notebook.id, "assistant", answer, citations);
+
+  if (chunks.length === 0) return { citations, searchQuery, stream: single(NO_ANSWER), finish };
 
   return {
-    citations: buildCitations(chunks),
+    citations,
+    searchQuery,
+    finish,
     stream: deps.llm.stream({
       instructions: buildInstructions(),
-      messages: [{ role: "user", content: buildUserPrompt(request.question, chunks) }],
+      messages: [
+        ...buildHistoryMessages(history),
+        { role: "user", content: buildUserPrompt(request.question, chunks) },
+      ],
     }),
   };
 }

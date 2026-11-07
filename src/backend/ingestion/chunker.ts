@@ -1,6 +1,7 @@
 import "server-only";
 
-import type { PdfPage } from "@/backend/ingestion/extract-pdf";
+// Eine Seite eines PDFs oder der ganze Text einer Text-Quelle (pageNumber null)
+export type TextPage = { pageNumber: number | null; text: string };
 
 export type Chunk = {
   chunkIndex: number;
@@ -67,12 +68,12 @@ function overlapTail(text: string, overlapChars: number): string {
 
 // Teilt die Seiten in Chunks. Ein Chunk liegt immer auf genau einer Seite,
 // damit Zitate eine eindeutige Seitenzahl haben.
-export function chunkPages(pages: PdfPage[], options: ChunkOptions = {}): Chunk[] {
+export function chunkPages(pages: TextPage[], options: ChunkOptions = {}): Chunk[] {
   const maxChars = options.maxChars ?? DEFAULT_MAX_CHARS;
   const overlapChars = Math.min(options.overlapChars ?? DEFAULT_OVERLAP_CHARS, Math.floor(maxChars / 2));
   const chunks: Chunk[] = [];
 
-  const push = (content: string, pageNumber: number) => {
+  const push = (content: string, pageNumber: number | null) => {
     chunks.push({
       chunkIndex: chunks.length,
       pageNumber,

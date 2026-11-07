@@ -160,3 +160,114 @@ export async function deleteSource(supabase: AppSupabaseClient, id: string): Pro
   const { error } = await supabase.from("sources").delete().eq("id", source.id);
   if (error) throw error;
 }
+
+// --- US-08: Text als Quelle ---------------------------------------------------
+
+// Grenze, damit die Server Action unter ihrem Body-Limit (1 MB) bleibt
+export const MAX_TEXT_SOURCE_CHARS = 200_000;
+const MIN_TEXT_SOURCE_CHARS = 20;
+
+const textSourceSchema = z.object({
+  title: sourceTitleSchema,
+  text: z
+    .string()
+    .trim()
+    .min(MIN_TEXT_SOURCE_CHARS, `Der Text muss mindestens ${MIN_TEXT_SOURCE_CHARS} Zeichen lang sein.`)
+    .max(MAX_TEXT_SOURCE_CHARS, `Der Text darf höchstens ${MAX_TEXT_SOURCE_CHARS.toLocaleString("de-DE")} Zeichen lang sein.`),
+});
+
+export type TextSourceRequest = { title: string; text: string };
+
+export function parseTextSource(value: unknown): TextSourceRequest {
+  const result = textSourceSchema.safeParse(value);
+  if (!result.success) {
+    throw new UserFacingError(result.error.issues[0]?.message ?? "Ungültige Eingabe.");
+  }
+  return result.data;
+}
+
+// Speichert den Text als .txt im Storage und legt die Quelle an.
+// Verarbeitet wird er danach wie ein PDF über processSource().
+export async function createTextSource(
+  supabase: AppSupabaseClient,
+  userId: string,
+  notebookId: string,
+  input: unknown,
+): Promise<{ sourceId: string }> {
+  const { title, text } = parseTextSource(input);
+  const parsedNotebookId = parseId(notebookId, "Notebook");
+  const sourceId = crypto.randomUUID();
+  const path = sourceStoragePath(userId, parsedNotebookId, sourceId, "txt");
+
+  const { error: insertError } = await supabase.from("sources").insert({
+    id: sourceId,
+    notebook_id: parsedNotebookId,
+    type: "text",
+    title,
+    storage_path: path,
+  });
+  if (insertError) {
+    if (insertError.code === "42501" || insertError.code === "23503") {
+      throw new UserFacingError("Notebook wurde nicht gefunden.");
+    }
+    throw insertError;
+  }
+
+  const { error } = await supabase.storage
+    .from(SOURCES_BUCKET)
+    .upload(path, new Blob([text], { type: "text/plain" }), { contentType: "text/plain" });
+  if (error) {
+    await supabase.from("sources").delete().eq("id", sourceId);
+    throw error;
+  }
+
+  return { sourceId };
+}
+
+// --- US-13: zitierte Stelle öffnen --------------------------------------------
+
+export type SourcePassage = {
+  sourceId: string;
+  sourceTitle: string;
+  type: SourceType;
+  pageNumber: number | null;
+  content: string;
+  // Kurzlebige Download-URL der Datei (nur bei PDFs)
+  fileUrl: string | null;
+};
+
+const SIGNED_URL_SECONDS = 10 * 60;
+
+// Liefert den zitierten Abschnitt samt Link auf die Datei. RLS sorgt dafür,
+// dass nur eigene Abschnitte gefunden werden.
+export async function getSourcePassage(
+  supabase: AppSupabaseClient,
+  chunkId: string,
+): Promise<SourcePassage> {
+  const { data: chunk, error } = await supabase
+    .from("chunks")
+    .select("content, page_number, sources(id, title, type, storage_path)")
+    .eq("id", parseId(chunkId, "Textstelle"))
+    .maybeSingle();
+  if (error) throw error;
+  const source = chunk?.sources;
+  if (!chunk || !source) throw new UserFacingError("Textstelle wurde nicht gefunden.");
+
+  let fileUrl: string | null = null;
+  if (source.type === "pdf") {
+    const { data, error: urlError } = await supabase.storage
+      .from(SOURCES_BUCKET)
+      .createSignedUrl(source.storage_path, SIGNED_URL_SECONDS);
+    if (urlError) throw urlError;
+    fileUrl = data.signedUrl;
+  }
+
+  return {
+    sourceId: source.id,
+    sourceTitle: source.title,
+    type: source.type as SourceType,
+    pageNumber: chunk.page_number,
+    content: chunk.content,
+    fileUrl,
+  };
+}

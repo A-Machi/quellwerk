@@ -4,11 +4,17 @@ import { Suspense } from "react";
 import { signOutAction } from "@/app/auth-actions";
 import { renameNotebookAction } from "@/app/notebook-actions";
 import {
+  clearChatAction,
+  getSourcePassageAction,
+} from "@/app/notebooks/[id]/chat-actions";
+import {
+  createTextSourceAction,
   createUploadAction,
   deleteSourceAction,
   renameSourceAction,
 } from "@/app/notebooks/[id]/source-actions";
 import { requireSession } from "@/backend/auth";
+import { listMessages } from "@/backend/chat/service";
 import { getNotebook } from "@/backend/notebooks/service";
 import { listSources } from "@/backend/sources/service";
 import { AppHeader } from "@/frontend/components/app-header";
@@ -36,12 +42,26 @@ async function NotebookView({
   const { supabase } = await requireSession();
   const notebook = await getNotebook(supabase, id);
   if (!notebook) notFound();
-  const sources = await listSources(supabase, notebook.id);
+  const [sources, messages] = await Promise.all([
+    listSources(supabase, notebook.id),
+    listMessages(supabase, notebook.id),
+  ]);
 
   return (
     <WorkspaceProvider notebookId={notebook.id} sources={sources}>
       <NotebookShell
-        chat={<ChatPanel />}
+        chat={
+          <ChatPanel
+            initialMessages={messages.map((m) => ({
+              ...m,
+              status: "done" as const,
+            }))}
+            actions={{
+              clear: clearChatAction,
+              loadPassage: getSourcePassageAction,
+            }}
+          />
+        }
         header={
           <AppHeader signOutAction={signOutAction}>
             <NotebookTitle
@@ -58,6 +78,7 @@ async function NotebookView({
             sources={sources}
             actions={{
               createUpload: createUploadAction,
+              createText: createTextSourceAction,
               rename: renameSourceAction,
               remove: deleteSourceAction,
             }}

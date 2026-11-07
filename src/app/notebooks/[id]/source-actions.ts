@@ -6,6 +6,7 @@ import { requireSession } from "@/backend/auth";
 import { toActionError, type ActionResult } from "@/backend/errors";
 import {
   createPdfUpload,
+  createTextSource,
   deleteSource,
   renameSource,
   type PdfUploadRequest,
@@ -20,6 +21,20 @@ export async function createUploadAction(
     const { supabase, user } = await requireSession();
     const ticket = await createPdfUpload(supabase, user.id, notebookId, file);
     return { ok: true, data: ticket };
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+// US-08: Text als Quelle. Verarbeitet wird danach wie bei PDFs über die Process-Route.
+export async function createTextSourceAction(
+  notebookId: string,
+  input: { title: string; text: string },
+): Promise<ActionResult<{ sourceId: string }>> {
+  try {
+    const { supabase, user } = await requireSession();
+    const result = await createTextSource(supabase, user.id, notebookId, input);
+    return { ok: true, data: result };
   } catch (error) {
     return toActionError(error);
   }

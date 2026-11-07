@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import { UserFacingError } from "@/backend/errors";
-import { MAX_UPLOAD_BYTES, parseSourceTitle, validatePdfUpload } from "@/backend/sources/service";
-import { MAX_UPLOAD_BYTES as CLIENT_MAX_UPLOAD_BYTES } from "@/frontend/lib/upload";
+import {
+  MAX_TEXT_SOURCE_CHARS,
+  MAX_UPLOAD_BYTES,
+  parseSourceTitle,
+  parseTextSource,
+  validatePdfUpload,
+} from "@/backend/sources/service";
+import {
+  MAX_TEXT_SOURCE_CHARS as CLIENT_MAX_TEXT_CHARS,
+  MAX_UPLOAD_BYTES as CLIENT_MAX_UPLOAD_BYTES,
+} from "@/frontend/lib/upload";
 
 describe("validatePdfUpload", () => {
   it("leitet den Titel aus dem Dateinamen ab", () => {
@@ -45,5 +54,21 @@ describe("parseSourceTitle", () => {
     expect(parseSourceTitle("  Vertrag  ")).toBe("Vertrag");
     expect(() => parseSourceTitle("   ")).toThrow("darf nicht leer sein");
     expect(() => parseSourceTitle("x".repeat(301))).toThrow("höchstens 300");
+  });
+});
+
+describe("parseTextSource (US-08)", () => {
+  it("trimmt Titel und Text und prüft die Grenzen", () => {
+    expect(parseTextSource({ title: " Notiz ", text: "  Ein Text mit genug Zeichen.  " })).toEqual({
+      title: "Notiz",
+      text: "Ein Text mit genug Zeichen.",
+    });
+    expect(() => parseTextSource({ title: "", text: "Ein Text mit genug Zeichen." })).toThrow("darf nicht leer sein");
+    expect(() => parseTextSource({ title: "Notiz", text: "kurz" })).toThrow("mindestens 20 Zeichen");
+    expect(() => parseTextSource({ title: "Notiz", text: "x".repeat(MAX_TEXT_SOURCE_CHARS + 1) })).toThrow("höchstens");
+  });
+
+  it("nutzt dieselbe Längengrenze wie die Vorprüfung im Browser", () => {
+    expect(CLIENT_MAX_TEXT_CHARS).toBe(MAX_TEXT_SOURCE_CHARS);
   });
 });

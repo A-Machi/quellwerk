@@ -92,3 +92,11 @@ describe("estimateTokens", () => {
     expect(estimateTokens("abcde")).toBe(2);
   });
 });
+
+describe("chunkPages für Text-Quellen (US-08)", () => {
+  it("erzeugt Chunks ohne Seitenzahl", () => {
+    const chunks = chunkPages([{ pageNumber: null, text: longText(20) }], { maxChars: 300, overlapChars: 50 });
+    expect(chunks.length).toBeGreaterThan(1);
+    expect(chunks.every((c) => c.pageNumber === null)).toBe(true);
+  });
+});

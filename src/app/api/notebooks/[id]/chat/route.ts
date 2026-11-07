@@ -8,6 +8,7 @@ import { UserFacingError } from "@/backend/errors";
 export const maxDuration = 60;
 
 // US-09: Frage beantworten und die Antwort als NDJSON-Stream senden.
+// US-11: Frage und fertige Antwort landen im Chatverlauf des Notebooks.
 export async function POST(request: Request, ctx: RouteContext<"/api/notebooks/[id]/chat">) {
   const session = await getSession();
   if (!session) return Response.json({ error: "Nicht angemeldet." }, { status: 401 });
@@ -32,9 +33,15 @@ export async function POST(request: Request, ctx: RouteContext<"/api/notebooks/[
     async start(controller) {
       const send = (event: ChatEvent) => controller.enqueue(encoder.encode(encodeChatEvent(event)));
       send({ type: "citations", citations: prepared.citations });
+      let answer = "";
       try {
-        for await (const delta of prepared.stream) send({ type: "text", delta });
-        send({ type: "done", messageId: null });
+        for await (const delta of prepared.stream) {
+          answer += delta;
+          send({ type: "text", delta });
+        }
+        // US-11: Antwort im Verlauf speichern
+        const messageId = await prepared.finish(answer);
+        send({ type: "done", messageId });
       } catch (error) {
         console.error("Antwort-Stream abgebrochen", error);
         send({ type: "error", message: describeChatError(error) });

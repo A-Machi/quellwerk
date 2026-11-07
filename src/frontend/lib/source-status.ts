@@ -17,7 +17,7 @@ export function isStaleUpload(source: Pick<SourceSummary, "status" | "createdAt"
 }
 
 export function getSourceStatusView(
-  source: Pick<SourceSummary, "status" | "error" | "pageCount" | "createdAt">,
+  source: Pick<SourceSummary, "status" | "error" | "pageCount" | "createdAt"> & { type?: SourceSummary["type"] },
   now = Date.now(),
 ): SourceStatusView {
   switch (source.status) {
@@ -29,7 +29,12 @@ export function getSourceStatusView(
       return { label: "Wird verarbeitet …", tone: "busy", busy: true, canRetry: false };
     case "ready":
       return {
-        label: source.pageCount === 1 ? "1 Seite" : `${source.pageCount ?? 0} Seiten`,
+        label:
+          source.type === "text"
+            ? "Text"
+            : source.pageCount === 1
+              ? "1 Seite"
+              : `${source.pageCount ?? 0} Seiten`,
         tone: "ready",
         busy: false,
         canRetry: false,
