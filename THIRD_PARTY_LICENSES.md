@@ -34,6 +34,16 @@ Stand: 2026-11-07
 
 Die UI-Komponenten unter `src/frontend/components/ui/` stammen aus shadcn/ui (MIT) und wurden ins Projekt kopiert.
 
+## KI-Modelle (über Cloudflare Workers AI)
+
+| Modell | Zweck | Lizenz | Quelle |
+|---|---|---|---|
+| gpt-oss-20b (`@cf/openai/gpt-oss-20b`) | Chat | Apache-2.0 | https://huggingface.co/openai/gpt-oss-20b |
+| bge-m3 (`@cf/baai/bge-m3`) | Embeddings | MIT | https://huggingface.co/BAAI/bge-m3 |
+| Mistral Small 3.1 (`@cf/mistralai/mistral-small-3.1-24b-instruct`) | Ausweichmodell Chat | Apache-2.0 | https://huggingface.co/mistralai/Mistral-Small-3.1-24B-Instruct-2503 |
+
+Lizenzen am 2026-11-07 über die Hugging-Face-API geprüft.
+
 ## Schriften
 
 | Schrift | Lizenz | Einbindung |

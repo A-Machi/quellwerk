@@ -48,11 +48,11 @@ Der Name „NotebookLM“ ist eine Marke von Google und darf nicht verwendet wer
 - [x] Auth: E-Mail-Login aktiviert, **öffentliche Registrierung deaktiviert**, anonyme Logins aus, eigener Nutzer im Dashboard angelegt und bestätigt
 
 ### V-04 – Cloudflare Workers AI einrichten
-- [ ] API-Token erstellt, der **nur** die Berechtigung „Workers AI“ hat
-- [ ] Testaufruf Embedding mit `@cf/baai/bge-m3` liefert 1024 Zahlen
-- [ ] 2–3 Chat-Modelle mit Apache-2.0-Lizenz getestet (Kandidaten in CLAUDE.md), mit deutschen Fragen zu einem Testtext. Bestes Modell ausgewählt.
-- [ ] Lizenz des gewählten Modells auf der Cloudflare-Modellseite und auf Hugging Face bestätigt
-- [ ] **Verbrauch gemessen:** Wie viele Neurons kostet eine Chat-Antwort, wie viele das Einbetten von 100 Seiten? Daraus abgeschätzt, wie viel pro Tag im Free Tier möglich ist.
+- [x] API-Token erstellt, der **nur** die Berechtigung „Workers AI“ hat (Read + Write, nur eigener Account, 1 Jahr gültig)
+- [x] Testaufruf Embedding mit `@cf/baai/bge-m3` liefert 1024 Zahlen (0,2 s)
+- [x] Chat-Modelle mit Apache-2.0-Lizenz getestet (gpt-oss-20b, gpt-oss-120b, mistral-small-3.1, granite-4.0-h-micro, glm-4.7-flash), mit deutschen Fragen zu einem Testtext. Gewählt: **gpt-oss-20b**, Ausweichmodell mistral-small-3.1. qwen3-30b-a3b fällt raus (Abschaltung 2026-11-20).
+- [x] Lizenz des gewählten Modells auf Hugging Face bestätigt (gpt-oss-20b: Apache-2.0, bge-m3: MIT)
+- [x] **Verbrauch gemessen:** Wie viele Neurons kostet eine Chat-Antwort, wie viele das Einbetten von 100 Seiten? Daraus abgeschätzt, wie viel pro Tag im Free Tier möglich ist. Ergebnis: ca. 127 Neurons pro Chat-Frage (7.000 Token), also ca. 75 Fragen pro Tag. Embeddings ca. 50 Neurons pro 100 Seiten (geschätzt nach Preis).
 
 ### V-05 – Next.js-Grundgerüst und erstes Deployment
 - [x] Projekt mit aktueller Next.js-Version (16.4.5), TypeScript (strict), Tailwind v4, App Router
@@ -62,7 +62,7 @@ Der Name „NotebookLM“ ist eine Marke von Google und darf nicht verwendet wer
 - [x] Leeres 3-Spalten-Layout: Quellen · Chat · (Platzhalter Studio)
 - [x] Ordnerstruktur `src/app` · `src/frontend` · `src/backend`, Backend mit `server-only` geschützt
 - [x] Repo in Vercel importiert (Team A-Team, Hobby), erstes Deployment erreichbar
-- [ ] Env-Variablen in Vercel gesetzt (folgt nach V-03 und V-04)
+- [x] Env-Variablen in Vercel gesetzt (alle 7 für Production, die zwei Secrets als „Secret“; Preview folgt bei Bedarf), Function Region Frankfurt (fra1), Redeploy erfolgreich
 
 ### V-06 – Konfiguration und Lizenzen
 - [x] `.env.example` mit `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CHAT_MODEL`, `EMBEDDING_MODEL`
@@ -229,7 +229,7 @@ Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen
 | # | Frage | Optionen | Empfehlung |
 |---|---|---|---|
 | 1 | Projektname | – | ✅ Quellwerk |
-| 2 | Chat-Modell | Qwen3 30B A3B · Mistral Small 3.1 · gpt-oss-20b | Nach Test in V-04 |
+| 2 | Chat-Modell | gpt-oss-20b · Mistral Small 3.1 · weitere | ✅ gpt-oss-20b |
 | 3 | Text-Quellen im MVP | Ja (US-08) · später | Ja, kleiner Aufwand |
 | 4 | Eigene Projekt-Lizenz | MIT · Apache-2.0 | ✅ MIT |
 | 5 | Supabase-Region | Frankfurt · andere EU-Region | ✅ Frankfurt |

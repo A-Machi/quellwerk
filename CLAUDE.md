@@ -28,7 +28,8 @@ Weitere Dienste nur nach Rückfrage beim Nutzer.
 
 **Konkrete Projekte:**
 - Supabase: Projekt `quellwerk`, ID `meahuhecbyuswfkyelgq`, Region Frankfurt (eu-central-1), Org „A-Machi's Org“ (Free). „Automatically expose new tables“ ist aus, darum braucht jede neue Tabelle ausdrückliche `GRANT`s in der Migration.
-- Vercel: Projekt `quellwerk` im Team „A-Team“ (Hobby), verbunden mit `A-Machi/quellwerk`, deployt `main` automatisch.
+- Vercel: Projekt `quellwerk` im Team „A-Team“ (Hobby), verbunden mit `A-Machi/quellwerk`, deployt `main` automatisch. Live-URL: https://quellwerk.vercel.app. Function Region Frankfurt (fra1). Env-Variablen nur für Production gesetzt, für Preview-Deployments bei Bedarf ergänzen.
+- Supabase Auth: Registrierung aus, anonyme Logins aus, ein bestätigter Nutzer. Site URL `https://quellwerk.vercel.app`, Redirect URLs `http://localhost:3000/**` und `https://quellwerk.vercel.app/**`.
 
 ## Verboten
 
@@ -65,7 +66,7 @@ Weitere Dienste nur nach Rückfrage beim Nutzer.
 | Dateien | Supabase Storage (privater Bucket) | Dienst |
 | Login | Supabase Auth (öffentliche Registrierung aus) | Dienst |
 | Supabase-Client | `@supabase/supabase-js`, `@supabase/ssr` | MIT |
-| Chat-Modell | Workers AI, Kandidaten: Qwen3 30B A3B, Mistral Small 3.1, gpt-oss-20b (Auswahl nach Test) | Apache-2.0 |
+| Chat-Modell | Workers AI `@cf/openai/gpt-oss-20b` (gewählt nach Test am 2026-11-07). Ausweichmodell: `@cf/mistralai/mistral-small-3.1-24b-instruct` | Apache-2.0 |
 | Embeddings | Workers AI `@cf/baai/bge-m3` (mehrsprachig, 1024 Dimensionen) | MIT |
 | AI-Anbindung | Vercel AI SDK (`ai`) + `@ai-sdk/openai-compatible` gegen den OpenAI-kompatiblen Endpoint von Workers AI | Apache-2.0 |
 | PDF | unpdf oder pdfjs-dist (Extraktion), react-pdf (Anzeige) | MIT / Apache-2.0 |
@@ -77,7 +78,12 @@ Weitere Dienste nur nach Rückfrage beim Nutzer.
 - Lesen/prüfen: `npx supabase db query --remote --read-only "<sql>"`
 - Sicherheitsprüfung nach jeder Migration: `npx supabase db advisors --remote --type security`
 
-Modellnamen bei Cloudflare ändern sich. Vor dem Einbau die aktuelle Modellliste prüfen.
+Modellnamen bei Cloudflare ändern sich, und Modelle werden abgeschaltet (Feld `planned_deprecation_date` in der Modellsuche der API). Vor dem Wechsel die aktuelle Modellliste prüfen.
+
+**Hinweise zu gpt-oss-20b (aus dem Test):**
+- Ist ein Reasoning-Modell. `reasoning_effort` auf `low` setzen (im AI SDK über `providerOptions`), sonst steigen Wartezeit und Verbrauch.
+- Eine realistische RAG-Frage (ca. 7.000 Token Input) kostet ca. 127 Neurons und 2 s. Free Tier = 10.000 Neurons pro Tag, also ca. 75 Fragen. Jede Antwort meldet den Verbrauch in `usage.neurons`.
+- Zitat-Marker robust parsen: Modelle schreiben `[1]`, manche auch `【1】`.
 
 ## Projektstruktur
 
