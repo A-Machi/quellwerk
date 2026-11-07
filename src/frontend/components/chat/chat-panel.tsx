@@ -3,6 +3,7 @@
 import { Send, Sparkles, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import type { Citation } from "@/backend/chat/prompt";
 import type { SourcePassage } from "@/backend/sources/service";
@@ -17,6 +18,7 @@ import { Button } from "@/frontend/components/ui/button";
 import { ScrollArea } from "@/frontend/components/ui/scroll-area";
 import { Textarea } from "@/frontend/components/ui/textarea";
 import { readChatEvents } from "@/frontend/lib/chat-stream";
+import { deriveTitle } from "@/frontend/lib/notes";
 
 const GENERIC_ERROR =
   "Die Antwort konnte nicht erzeugt werden. Bitte versuche es erneut.";
@@ -27,6 +29,10 @@ type Result<T = undefined> =
 export type ChatActions = {
   clear: (notebookId: string) => Promise<Result>;
   loadPassage: (chunkId: string) => Promise<Result<SourcePassage>>;
+  saveNote: (
+    notebookId: string,
+    input: { title: string; content: string; citations: Citation[] },
+  ) => Promise<Result<{ id: string }>>;
 };
 
 export function ChatPanel({
@@ -47,6 +53,25 @@ export function ChatPanel({
   const onOpenCitation = useCallback(
     (citation: Citation) => setOpenCitation(citation),
     [],
+  );
+
+  // US-17: Antwort als Notiz speichern, Titel aus der Frage davor
+  const onSaveNote = useCallback(
+    async (message: UiMessage) => {
+      const index = messages.findIndex((m) => m.id === message.id);
+      const question = messages
+        .slice(0, index)
+        .reverse()
+        .find((m) => m.role === "user")?.content;
+      const result = await actions.saveNote(notebookId, {
+        title: deriveTitle(question ?? message.content),
+        content: message.content,
+        citations: message.citations,
+      });
+      if (result.ok) toast.success("Als Notiz gespeichert");
+      else toast.error(result.error);
+    },
+    [actions, messages, notebookId],
   );
 
   const readyCount = sources.filter((s) => s.status === "ready").length;
@@ -209,6 +234,7 @@ export function ChatPanel({
                 key={message.id}
                 message={message}
                 onOpenCitation={onOpenCitation}
+                onSaveNote={onSaveNote}
               />
             ))}
             <div ref={endRef} />

@@ -14,8 +14,15 @@ import {
   deleteSourceAction,
   renameSourceAction,
 } from "@/app/notebooks/[id]/source-actions";
+import {
+  createNoteAction,
+  deleteNoteAction,
+  noteToSourceAction,
+  updateNoteAction,
+} from "@/app/notebooks/[id]/note-actions";
 import { requireSession } from "@/backend/auth";
 import { listMessages } from "@/backend/chat/service";
+import { listNotes } from "@/backend/notes/service";
 import { getNotebook } from "@/backend/notebooks/service";
 import { listSources } from "@/backend/sources/service";
 import { AppHeader } from "@/frontend/components/app-header";
@@ -24,6 +31,7 @@ import { NotebookShell } from "@/frontend/components/notebook/notebook-shell";
 import { WorkspaceProvider } from "@/frontend/components/notebook/workspace-context";
 import { NotebookTitle } from "@/frontend/components/notebooks/notebook-title";
 import { SourcePanel } from "@/frontend/components/sources/source-panel";
+import { StudioPanel } from "@/frontend/components/studio/studio-panel";
 import { Skeleton } from "@/frontend/components/ui/skeleton";
 
 export default function NotebookPage({ params }: PageProps<"/notebooks/[id]">) {
@@ -43,9 +51,10 @@ async function NotebookView({
   const { supabase } = await requireSession();
   const notebook = await getNotebook(supabase, id);
   if (!notebook) notFound();
-  const [sources, messages] = await Promise.all([
+  const [sources, messages, notes] = await Promise.all([
     listSources(supabase, notebook.id),
     listMessages(supabase, notebook.id),
+    listNotes(supabase, notebook.id),
   ]);
 
   return (
@@ -59,6 +68,19 @@ async function NotebookView({
             }))}
             actions={{
               clear: clearChatAction,
+              loadPassage: getSourcePassageAction,
+              saveNote: createNoteAction,
+            }}
+          />
+        }
+        studio={
+          <StudioPanel
+            notes={notes}
+            actions={{
+              create: createNoteAction,
+              update: updateNoteAction,
+              remove: deleteNoteAction,
+              toSource: noteToSourceAction,
               loadPassage: getSourcePassageAction,
             }}
           />

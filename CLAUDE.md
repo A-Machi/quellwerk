@@ -92,7 +92,8 @@ src/
   app/        Routing von Next.js (Pflichtordner). Seiten und Route Handler bleiben dünn
               und rufen nur frontend/ bzw. backend/ auf.
   frontend/   components/ (ui/ = shadcn), hooks/, lib/ (Browser-Code, Supabase-Browser-Client)
-  backend/    env.ts, supabase/, ai/ und künftige Services. Jede Datei beginnt mit
+  backend/    env.ts, auth.ts, supabase/, ai/ (Provider, Embeddings, Verbrauch), ingestion/ (PDF/Text → Chunks),
+              chat/, notes/, studio/, search/, sources/, notebooks/. Jede Datei beginnt mit
               `import "server-only"`, damit Secrets nie ins Browser-Bundle geraten.
 ```
 

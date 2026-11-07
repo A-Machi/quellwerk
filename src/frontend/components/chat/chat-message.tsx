@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, BookmarkPlus } from "lucide-react";
 import { memo, useMemo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -25,9 +25,11 @@ const MARKDOWN_STYLES =
 export const ChatMessage = memo(function ChatMessage({
   message,
   onOpenCitation,
+  onSaveNote,
 }: {
   message: UiMessage;
   onOpenCitation?: (citation: Citation) => void;
+  onSaveNote?: (message: UiMessage) => void;
 }) {
   if (message.role === "user") {
     return (
@@ -42,9 +44,19 @@ export const ChatMessage = memo(function ChatMessage({
   return (
     <div className="flex flex-col gap-2" data-testid="assistant-message">
       {message.content ? (
-        <AssistantMarkdown content={message.content} citations={message.citations} onOpenCitation={onOpenCitation} />
+        <CitationMarkdown content={message.content} citations={message.citations} onOpenCitation={onOpenCitation} />
       ) : message.status === "streaming" ? (
         <p className="animate-pulse text-sm text-muted-foreground">Durchsucht die Quellen …</p>
+      ) : null}
+      {message.status === "done" && message.content && onSaveNote ? (
+        <button
+          type="button"
+          onClick={() => onSaveNote(message)}
+          className="inline-flex items-center gap-1 self-start text-xs text-muted-foreground hover:text-foreground"
+        >
+          <BookmarkPlus className="size-3.5" aria-hidden />
+          Als Notiz speichern
+        </button>
       ) : null}
       {message.status === "error" ? (
         <p role="alert" className="flex items-center gap-1.5 text-sm text-destructive">
@@ -56,7 +68,8 @@ export const ChatMessage = memo(function ChatMessage({
   );
 });
 
-function AssistantMarkdown({
+// Markdown mit Zitat-Chips. Wird auch für Notizen und Studio-Ausgaben genutzt.
+export function CitationMarkdown({
   content,
   citations,
   onOpenCitation,

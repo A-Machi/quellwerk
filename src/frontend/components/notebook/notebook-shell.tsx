@@ -1,7 +1,5 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
-
 import {
   ResizableHandle,
   ResizablePanel,
@@ -15,10 +13,12 @@ export function NotebookShell({
   header,
   sources,
   chat,
+  studio,
 }: {
   header: React.ReactNode;
   sources: React.ReactNode;
   chat: React.ReactNode;
+  studio: React.ReactNode;
 }) {
   return (
     <div className="flex h-dvh flex-col">
@@ -38,12 +38,7 @@ export function NotebookShell({
         <ResizableHandle withHandle />
 
         <ResizablePanel defaultSize="25%" minSize="15%">
-          <Column title="Studio">
-            <div className="flex flex-col items-center gap-3 px-6 py-12 text-center text-sm text-muted-foreground [&_svg]:size-6">
-              <Sparkles />
-              <p className="max-w-64">Zusammenfassungen, FAQ und Lernhilfen kommen in Phase 2.</p>
-            </div>
-          </Column>
+          {studio}
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

@@ -214,7 +214,7 @@ Sprint 4  Fertigstellen     US-11, US-13, US-08 (Should)
 
 Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen.
 
-**Stand 2026-11-07:** MVP komplett, Sprint 0 bis 4 erledigt, dazu Dark Mode. Tests: 91 Unit-Tests (`npm test`) und 54 Integrationstests gegen Supabase (`npm run test:integration`), beide laufen vor jedem Vercel-Deployment (`npm run verify`). Dazu 9 Tests mit echtem Workers AI (`RUN_AI_TESTS=1`), u. a. die 5 Testfragen für US-10 und eine Folgefrage für US-11.
+**Stand 2026-11-07:** MVP und Phase 2 komplett (Sprint 0 bis 8), dazu Dark Mode. Tests: 123 Unit-Tests (`npm test`) und 71 Integrationstests gegen Supabase (`npm run test:integration`), beide laufen vor jedem Vercel-Deployment (`npm run verify`). Dazu 11 Tests mit echtem Workers AI (`RUN_AI_TESTS=1`).
 
 ---
 
@@ -268,7 +268,7 @@ Grundlage: Preis laut Cloudflare-API (0,20 $ pro 1 Mio. Input-Token, 0,30 $ pro 
 | Chat-Frage (MVP, gemessen) | ca. 7.000 Token | ca. 300 Token | **127** | ca. 75 |
 | Zusammenfassung, ganzes OWASP-PDF (122 Seiten) | ca. 57.000 Token | ca. 800 Token | ca. 1.060 | ca. 9 |
 | Zusammenfassung mit Auswahl (max. 12.000 Token) | ca. 12.000 Token | ca. 800 Token | **220 (gemessen)** | ca. 45 |
-| Studio-Ausgabe aus Zusammenfassungen + 8 Abschnitten | ca. 9.000 Token | ca. 1.500 Token | **ca. 205** | ca. 45 |
+| Studio-Ausgabe aus Zusammenfassungen + 8 Abschnitten | ca. 1.000–9.000 Token | ca. 1.500 Token | **21 gemessen (kleine Quelle), ca. 150–200 bei großen Quellen** | ab ca. 50 |
 | Umformulieren einer Folgefrage (MVP) | ca. 300 Token | ca. 50 Token | ca. 7 | – |
 
 Die Werte werden in V-07 gemessen und hier ersetzt.
@@ -279,9 +279,9 @@ Die Werte werden in V-07 gemessen und hier ersetzt.
 
 ### V-07 – Verbrauch messen
 - [x] Zusammenfassung mit Auswahl (12.000 Token) gemessen: 220 Neurons (synthetisches 40-Seiten-Dokument). Das ganze Dokument wurde nicht gemessen, um das Kontingent zu schonen: Der Verbrauch ist linear zu den Token (bestätigt durch die Chat-Messung), also ca. 1.000 Neurons für 57.000 Token.
-- [ ] Studio-Ausgabe (FAQ) aus Zusammenfassungen und 8 Abschnitten erzeugen und messen
+- [x] Studio-Ausgabe (FAQ) gemessen: 20,7 Neurons bei einer kleinen Quelle (ca. 1.000 Token Input). Bei großen Quellen mit 8 vollen Abschnitten linear ca. 150–200.
 - [x] Auswahl liefert eine sinnvolle deutsche Zusammenfassung mit Themen (Test mit echtem Modell). Entscheidung 2 bleibt: Auswahl.
-- [ ] Tabelle „Kosten-Schätzung“ oben mit den gemessenen Werten aktualisieren
+- [x] Tabelle „Kosten-Schätzung“ oben mit den gemessenen Werten aktualisiert
 
 ### V-08 – Datenbank erweitern (Migration)
 - [x] `sources`: Spalten `summary text`, `key_topics text[]`, `summary_status` (`none` · `pending` · `ready` · `failed`)
@@ -320,22 +320,22 @@ Als Nutzer möchte ich zu jeder Quelle eine kurze Zusammenfassung und die Schlü
 
 #### US-15 – Studio-Ausgabe erzeugen · L · Must
 Als Nutzer möchte ich aus den ausgewählten Quellen per Klick einen Study Guide, ein FAQ, ein Briefing oder eine Zeitleiste erzeugen, damit ich den Inhalt in einer passenden Form lernen oder weitergeben kann.
-- [ ] Studio-Spalte zeigt vier Kacheln: Study Guide, FAQ, Briefing, Zeitleiste
-- [ ] Nutzt die im Chat ausgewählten Quellen (US-07)
-- [ ] Input fürs Modell: Zusammenfassungen der Quellen (US-14) plus passende Abschnitte, max. ca. 9.000 Token
-- [ ] Ausgabe als Markdown mit Quellenangaben `[n]`, Chips wie im Chat (US-12) und Klick zur Stelle (US-13)
-- [ ] Wird gestreamt angezeigt und danach in `notes` gespeichert
-- [ ] Vor dem Erzeugen wird der geschätzte Verbrauch angezeigt („ca. 200 Neurons“)
-- [ ] Zeitleiste: nur Ereignisse mit Datum aus den Quellen, sonst Hinweis „Keine datierten Ereignisse gefunden“
+- [x] Studio-Spalte zeigt vier Kacheln: Study Guide, FAQ, Briefing, Zeitleiste
+- [x] Nutzt die im Chat ausgewählten Quellen (US-07)
+- [x] Input fürs Modell: Zusammenfassungen der Quellen (US-14) plus passende Abschnitte, max. ca. 9.000 Token
+- [x] Ausgabe als Markdown mit Quellenangaben `[n]`, Chips wie im Chat (US-12) und Klick zur Stelle (US-13)
+- [x] Wird gestreamt angezeigt und danach in `notes` gespeichert
+- [x] Vor dem Erzeugen wird der geschätzte Verbrauch angezeigt („ca. 200 Neurons“)
+- [x] Zeitleiste: nur Ereignisse mit Datum aus den Quellen, sonst Hinweis „Keine datierten Ereignisse gefunden“
 
 *Braucht:* US-14, V-08 · *Kosten:* ca. 205 Neurons pro Ausgabe
 
 #### US-16 – Studio-Ausgaben verwalten · S · Must
 Als Nutzer möchte ich erzeugte Ausgaben wieder öffnen, löschen und kopieren, damit ich sie nicht neu erzeugen muss.
-- [ ] Liste der Ausgaben unter den Kacheln mit Typ, Titel und Datum
-- [ ] Öffnen in einer größeren Ansicht, Löschen mit Bestätigung
-- [ ] „Als Markdown kopieren“ in die Zwischenablage
-- [ ] „Neu erzeugen“ mit den aktuell ausgewählten Quellen
+- [x] Liste der Ausgaben unter den Kacheln mit Typ, Titel und Datum
+- [x] Öffnen in einer größeren Ansicht, Löschen mit Bestätigung
+- [x] „Als Markdown kopieren“ in die Zwischenablage
+- [x] „Neu erzeugen“ mit den aktuell ausgewählten Quellen
 
 *Braucht:* US-15
 
@@ -343,24 +343,24 @@ Als Nutzer möchte ich erzeugte Ausgaben wieder öffnen, löschen und kopieren, 
 
 #### US-17 – Chat-Antwort als Notiz speichern · S · Must
 Als Nutzer möchte ich eine gute Antwort aus dem Chat als Notiz behalten, damit sie nicht verloren geht, wenn ich den Chat leere.
-- [ ] Button „Als Notiz speichern“ unter jeder Antwort
-- [ ] Notiz behält Text und Quellenangaben, Titel aus der Frage
-- [ ] Erscheint in der Studio-Spalte bei den Notizen
+- [x] Button „Als Notiz speichern“ unter jeder Antwort
+- [x] Notiz behält Text und Quellenangaben, Titel aus der Frage
+- [x] Erscheint in der Studio-Spalte bei den Notizen
 
 *Braucht:* V-08
 
 #### US-18 – Eigene Notizen schreiben · M · Should
 Als Nutzer möchte ich eigene Notizen anlegen, bearbeiten und löschen, damit ich Gedanken direkt neben den Quellen festhalten kann.
-- [ ] Neue Notiz mit Titel und Markdown-Text, Vorschau beim Lesen
-- [ ] Bearbeiten und Löschen mit Bestätigung
-- [ ] Gespeichert pro Notebook, nur für den eigenen Nutzer sichtbar (RLS)
+- [x] Neue Notiz mit Titel und Markdown-Text, Vorschau beim Lesen
+- [x] Bearbeiten und Löschen mit Bestätigung
+- [x] Gespeichert pro Notebook, nur für den eigenen Nutzer sichtbar (RLS)
 
 *Braucht:* V-08
 
 #### US-19 – Notiz als Quelle verwenden · S · Could
 Als Nutzer möchte ich eine Notiz in eine Quelle umwandeln, damit der Chat sie bei Antworten berücksichtigt.
-- [ ] Button „Als Quelle hinzufügen“ an einer Notiz
-- [ ] Wird wie eine Text-Quelle (US-08) verarbeitet
+- [x] Button „Als Quelle hinzufügen“ an einer Notiz
+- [x] Wird wie eine Text-Quelle (US-08) verarbeitet
 
 *Braucht:* US-18, US-08 · *Kosten:* Embeddings, vernachlässigbar
 

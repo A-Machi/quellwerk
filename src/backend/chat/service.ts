@@ -61,7 +61,7 @@ export function describeChatError(error: unknown): string {
 }
 
 // Nur fertige Quellen dieses Notebooks durchsuchen, egal was der Browser schickt.
-async function readySourceIds(
+export async function readySourceIds(
   supabase: AppSupabaseClient,
   notebookId: string,
   sourceIds: string[],
