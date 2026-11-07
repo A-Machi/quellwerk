@@ -21,6 +21,7 @@ import {
 import { UserFacingError } from "@/backend/errors";
 import { isQuotaExceededError } from "@/backend/ingestion/errors";
 import { getNotebook, parseId } from "@/backend/notebooks/service";
+import { extractSearchTerms } from "@/backend/search/keywords";
 import type { Json } from "@/backend/supabase/database.types";
 import type { AppSupabaseClient } from "@/backend/supabase/types";
 
@@ -82,8 +83,10 @@ export async function retrieveChunks(
   limit = TOP_K,
 ): Promise<RetrievedChunk[]> {
   const [vector] = await embed([query]);
-  const { data: matches, error } = await supabase.rpc("match_chunks", {
+  // US-20: Hybrid-Suche aus Vektor-Ähnlichkeit und Volltext (exakte Begriffe wie "LLM05")
+  const { data: matches, error } = await supabase.rpc("match_chunks_hybrid", {
     query_embedding: JSON.stringify(vector),
+    query_terms: extractSearchTerms(query),
     source_ids: sourceIds,
     match_count: limit,
   });

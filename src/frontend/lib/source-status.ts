@@ -50,11 +50,18 @@ export function getSourceStatusView(
 }
 
 // Solange eine Quelle hochgeladen oder verarbeitet wird, fragt die Seite den Status ab.
+// Nach dieser Zeit wird auf eine automatische Zusammenfassung nicht mehr gewartet.
+export const SUMMARY_WAIT_MS = 10 * 60 * 1000;
+
 export function shouldPollSources(
-  sources: Pick<SourceSummary, "status" | "createdAt">[],
+  sources: (Pick<SourceSummary, "status" | "createdAt"> & Partial<Pick<SourceSummary, "summaryStatus">>)[],
   now = Date.now(),
 ): boolean {
   return sources.some(
-    (source) => source.status === "processing" || (source.status === "uploaded" && !isStaleUpload(source, now)),
+    (source) =>
+      source.status === "processing" ||
+      (source.status === "uploaded" && !isStaleUpload(source, now)) ||
+      // US-14: Zusammenfassung läuft nach der Verarbeitung im Hintergrund
+      (source.summaryStatus === "pending" && now - new Date(source.createdAt).getTime() < SUMMARY_WAIT_MS),
   );
 }

@@ -52,6 +52,20 @@ export async function requestProcessing(sourceId: string): Promise<void> {
   }
 }
 
+// US-14: Zusammenfassung (neu) erzeugen
+export async function requestSummary(sourceId: string): Promise<void> {
+  const response = await fetch(`/api/sources/${sourceId}/summary`, { method: "POST" });
+  const body = (await response.json().catch(() => null)) as { error?: string; status?: string; reason?: string } | null;
+  if (!response.ok) throw new Error(body?.error ?? "Die Zusammenfassung konnte nicht erstellt werden.");
+  if (body?.status === "failed") {
+    throw new Error(
+      body.reason === "quota"
+        ? "Tageslimit von Workers AI erreicht. Bitte morgen erneut versuchen."
+        : "Die Zusammenfassung konnte nicht erstellt werden.",
+    );
+  }
+}
+
 export function SourcePanel({
   notebookId,
   sources,
@@ -203,6 +217,14 @@ export function SourcePanel({
                 onRetry={async () => {
                   try {
                     await requestProcessing(source.id);
+                  } catch (error) {
+                    toast.error((error as Error).message);
+                  }
+                  router.refresh();
+                }}
+                onSummarize={async () => {
+                  try {
+                    await requestSummary(source.id);
                   } catch (error) {
                     toast.error((error as Error).message);
                   }

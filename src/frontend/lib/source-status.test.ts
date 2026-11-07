@@ -5,6 +5,7 @@ import {
   isStaleUpload,
   shouldPollSources,
   STALE_UPLOAD_MS,
+  SUMMARY_WAIT_MS,
 } from "@/frontend/lib/source-status";
 
 const NOW = new Date("2026-11-07T12:00:00Z").getTime();
@@ -59,5 +60,13 @@ describe("Text-Quellen (US-08)", () => {
   it("zeigt bei fertigen Text-Quellen 'Text' statt einer Seitenzahl", () => {
     expect(getSourceStatusView({ ...base, type: "text", status: "ready", pageCount: null }, NOW).label).toBe("Text");
     expect(getSourceStatusView({ ...base, type: "pdf", status: "ready", pageCount: 3 }, NOW).label).toBe("3 Seiten");
+  });
+});
+
+describe("Polling während der Zusammenfassung (US-14)", () => {
+  it("fragt ab, solange eine frische Zusammenfassung läuft, aber nicht ewig", () => {
+    expect(shouldPollSources([{ status: "ready", summaryStatus: "pending", createdAt: at(60_000) }], NOW)).toBe(true);
+    expect(shouldPollSources([{ status: "ready", summaryStatus: "pending", createdAt: at(SUMMARY_WAIT_MS + 1) }], NOW)).toBe(false);
+    expect(shouldPollSources([{ status: "ready", summaryStatus: "ready", createdAt: at(1000) }], NOW)).toBe(false);
   });
 });

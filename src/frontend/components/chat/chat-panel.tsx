@@ -36,7 +36,7 @@ export function ChatPanel({
   initialMessages?: UiMessage[];
   actions: ChatActions;
 }) {
-  const { notebookId, selectedIds, sources } = useWorkspace();
+  const { notebookId, selectedIds, sources, registerAsk } = useWorkspace();
   const router = useRouter();
   const [messages, setMessages] = useState<UiMessage[]>(initialMessages);
   const [input, setInput] = useState("");
@@ -132,6 +132,18 @@ export function ChatPanel({
       router.refresh();
     }
   }
+
+  // US-14: Klick auf ein Schlüsselthema stellt die Frage direkt im Chat.
+  const latest = useRef({ ask, canAsk });
+  useEffect(() => {
+    latest.current = { ask, canAsk };
+  });
+  useEffect(() => {
+    registerAsk((question) => {
+      if (latest.current.canAsk) void latest.current.ask(question);
+    });
+    return () => registerAsk(null);
+  }, [registerAsk]);
 
   function submit() {
     const question = input.trim();

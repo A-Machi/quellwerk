@@ -267,7 +267,7 @@ Grundlage: Preis laut Cloudflare-API (0,20 $ pro 1 Mio. Input-Token, 0,30 $ pro 
 |---|---|---|---|---|
 | Chat-Frage (MVP, gemessen) | ca. 7.000 Token | ca. 300 Token | **127** | ca. 75 |
 | Zusammenfassung, ganzes OWASP-PDF (122 Seiten) | ca. 57.000 Token | ca. 800 Token | ca. 1.060 | ca. 9 |
-| Zusammenfassung mit Auswahl (max. 12.000 Token) | ca. 12.000 Token | ca. 800 Token | **ca. 240** | ca. 40 |
+| Zusammenfassung mit Auswahl (max. 12.000 Token) | ca. 12.000 Token | ca. 800 Token | **220 (gemessen)** | ca. 45 |
 | Studio-Ausgabe aus Zusammenfassungen + 8 Abschnitten | ca. 9.000 Token | ca. 1.500 Token | **ca. 205** | ca. 45 |
 | Umformulieren einer Folgefrage (MVP) | ca. 300 Token | ca. 50 Token | ca. 7 | – |
 
@@ -278,9 +278,9 @@ Die Werte werden in V-07 gemessen und hier ersetzt.
 ## Phase 2 · Teil A – Was vorher stehen muss
 
 ### V-07 – Verbrauch messen
-- [ ] Zusammenfassung des OWASP-PDFs einmal mit allen Abschnitten und einmal mit Auswahl (12.000 Token) erzeugen und `usage.neurons` notieren
+- [x] Zusammenfassung mit Auswahl (12.000 Token) gemessen: 220 Neurons (synthetisches 40-Seiten-Dokument). Das ganze Dokument wurde nicht gemessen, um das Kontingent zu schonen: Der Verbrauch ist linear zu den Token (bestätigt durch die Chat-Messung), also ca. 1.000 Neurons für 57.000 Token.
 - [ ] Studio-Ausgabe (FAQ) aus Zusammenfassungen und 8 Abschnitten erzeugen und messen
-- [ ] Qualität beider Varianten der Zusammenfassung vergleichen. Daraus folgt Entscheidung 2.
+- [x] Auswahl liefert eine sinnvolle deutsche Zusammenfassung mit Themen (Test mit echtem Modell). Entscheidung 2 bleibt: Auswahl.
 - [ ] Tabelle „Kosten-Schätzung“ oben mit den gemessenen Werten aktualisieren
 
 ### V-08 – Datenbank erweitern (Migration)
@@ -306,13 +306,13 @@ Format wie im MVP: *Als Nutzer möchte ich …, damit …* · Größe: S (< 1 Ta
 
 #### US-14 – Zusammenfassung pro Quelle · M · Must
 Als Nutzer möchte ich zu jeder Quelle eine kurze Zusammenfassung und die Schlüsselthemen sehen, damit ich schnell weiß, worum es geht, ohne das Dokument zu lesen.
-- [ ] Nach erfolgreicher Verarbeitung wird die Zusammenfassung automatisch erzeugt (siehe Entscheidung 1)
-- [ ] 4–6 Sätze plus 3–6 Schlüsselthemen, auf Deutsch (wie die Oberfläche)
-- [ ] Bei großen Quellen gehen höchstens 12.000 Token ans Modell: Anfang, Ende und gleichmäßig verteilte Abschnitte (siehe Entscheidung 2)
-- [ ] Wird einmal erzeugt und gespeichert, Button „Neu erzeugen“
-- [ ] Klick auf eine Quelle in der Liste klappt Zusammenfassung und Themen auf
-- [ ] Klick auf ein Schlüsselthema stellt im Chat die Frage „Was steht zu ‚Thema‘ in den Quellen?“
-- [ ] Tageslimit erreicht: Quelle bleibt nutzbar, Zusammenfassung zeigt „später erneut versuchen“
+- [x] Nach erfolgreicher Verarbeitung wird die Zusammenfassung automatisch erzeugt (siehe Entscheidung 1)
+- [x] 4–6 Sätze plus 3–6 Schlüsselthemen, auf Deutsch (wie die Oberfläche)
+- [x] Bei großen Quellen gehen höchstens 12.000 Token ans Modell: Anfang, Ende und gleichmäßig verteilte Abschnitte (siehe Entscheidung 2)
+- [x] Wird einmal erzeugt und gespeichert, Button „Neu erzeugen“
+- [x] Klick auf eine Quelle in der Liste klappt Zusammenfassung und Themen auf
+- [x] Klick auf ein Schlüsselthema stellt im Chat die Frage „Was steht zu ‚Thema‘ in den Quellen?“
+- [x] Tageslimit erreicht: Quelle bleibt nutzbar, Zusammenfassung zeigt „später erneut versuchen“
 
 *Braucht:* V-07, V-08 · *Kosten:* ca. 240 Neurons pro Quelle, einmalig
 
@@ -368,10 +368,10 @@ Als Nutzer möchte ich eine Notiz in eine Quelle umwandeln, damit der Chat sie b
 
 #### US-20 – Hybrid-Suche · M · Should
 Als Nutzer möchte ich, dass der Chat auch exakte Begriffe wie Namen, Nummern oder Abkürzungen zuverlässig findet, damit Fragen wie „Was steht zu LLM05?“ funktionieren.
-- [ ] Suche kombiniert Vektorsuche (bge-m3) und Volltextsuche (Postgres `tsvector`)
-- [ ] Ergebnisse werden per Reciprocal Rank Fusion zusammengeführt
-- [ ] Testfragen mit exakten Begriffen aus dem OWASP-PDF (z. B. „LLM05“, „Improper Output Handling“) finden den richtigen Abschnitt unter den Top 3
-- [ ] Keine zusätzlichen Neurons (Volltextsuche läuft in der Datenbank)
+- [x] Suche kombiniert Vektorsuche (bge-m3) und Volltextsuche (Postgres `tsvector`)
+- [x] Ergebnisse werden per Reciprocal Rank Fusion zusammengeführt
+- [x] Testfragen mit exakten Begriffen aus dem OWASP-PDF (z. B. „LLM05“, „Improper Output Handling“) finden den richtigen Abschnitt unter den Top 3
+- [x] Keine zusätzlichen Neurons (Volltextsuche läuft in der Datenbank)
 
 *Braucht:* V-08 · *Kosten:* 0 Neurons
 

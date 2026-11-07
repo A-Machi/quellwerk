@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   CheckCircle2,
+  ChevronDown,
   ClipboardPaste,
   FileText,
   Loader2,
@@ -17,6 +18,7 @@ import type { SourceSummary } from "@/backend/sources/service";
 import { ConfirmDeleteDialog } from "@/frontend/components/common/confirm-delete-dialog";
 import { RenameDialog } from "@/frontend/components/common/rename-dialog";
 import { useWorkspace } from "@/frontend/components/notebook/workspace-context";
+import { SourceDetails } from "@/frontend/components/sources/source-details";
 import { Button } from "@/frontend/components/ui/button";
 import { Checkbox } from "@/frontend/components/ui/checkbox";
 import {
@@ -33,26 +35,30 @@ type Result = { ok: true } | { ok: false; error: string };
 export function SourceItem({
   source,
   onRetry,
+  onSummarize,
   renameAction,
   deleteAction,
 }: {
   source: SourceSummary;
   onRetry: () => Promise<void>;
+  onSummarize: () => Promise<void>;
   renameAction: (id: string, title: string) => Promise<Result>;
   deleteAction: (id: string) => Promise<Result>;
 }) {
   const [renaming, setRenaming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [retrying, startRetry] = useTransition();
+  const [expanded, setExpanded] = useState(false);
   const status = getSourceStatusView(source);
   const { isSelected, toggle } = useWorkspace();
 
   return (
     <li
-      className="group flex items-start gap-2 rounded-lg px-2 py-2 hover:bg-muted/60"
+      className="group rounded-lg px-2 py-2 hover:bg-muted/60"
       data-testid="source-item"
       data-status={source.status}
     >
+      <div className="flex items-start gap-2">
       <div className="mt-0.5 shrink-0 text-muted-foreground [&_svg]:size-4">
         {status.tone === "busy" ? (
           <Loader2 className="animate-spin" aria-hidden />
@@ -66,9 +72,22 @@ export function SourceItem({
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium" title={source.title}>
-          {source.title}
-        </p>
+        <button
+          type="button"
+          className="flex w-full min-w-0 items-center gap-1 text-left text-sm font-medium disabled:cursor-default"
+          title={source.title}
+          disabled={source.status !== "ready"}
+          aria-expanded={source.status === "ready" ? expanded : undefined}
+          onClick={() => setExpanded((open) => !open)}
+        >
+          <span className="truncate">{source.title}</span>
+          {source.status === "ready" ? (
+            <ChevronDown
+              className={cn("size-3.5 shrink-0 text-muted-foreground transition-transform", expanded && "rotate-180")}
+              aria-hidden
+            />
+          ) : null}
+        </button>
         <p
           className={cn(
             "flex items-center gap-1 text-xs",
@@ -131,6 +150,9 @@ export function SourceItem({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      </div>
+      {expanded && source.status === "ready" ? <SourceDetails source={source} onSummarize={onSummarize} /> : null}
 
       <RenameDialog
         open={renaming}

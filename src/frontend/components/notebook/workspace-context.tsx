@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, use, useMemo, useSyncExternalStore } from "react";
+import { createContext, use, useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 
 import type { SourceSummary } from "@/backend/sources/service";
 import { parseDeselected, selectAllState, selectedSourceIds, type SelectAllState } from "@/frontend/lib/source-selection";
@@ -13,6 +13,9 @@ type Workspace = {
   toggle: (id: string, selected: boolean) => void;
   allState: SelectAllState;
   setAll: (selected: boolean) => void;
+  // Frage an den Chat schicken, z. B. per Klick auf ein Schlüsselthema (US-14)
+  ask: (question: string) => void;
+  registerAsk: (handler: ((question: string) => void) | null) => void;
 };
 
 const WorkspaceContext = createContext<Workspace | null>(null);
@@ -63,6 +66,11 @@ export function WorkspaceProvider({
   const key = storageKey(notebookId);
   // Auf dem Server gibt es keinen localStorage: dort ist alles ausgewählt.
   const raw = useSyncExternalStore(subscribe, () => readStored(key), () => null);
+  const askHandler = useRef<((question: string) => void) | null>(null);
+  const ask = useCallback((question: string) => askHandler.current?.(question), []);
+  const registerAsk = useCallback((handler: ((question: string) => void) | null) => {
+    askHandler.current = handler;
+  }, []);
 
   const value = useMemo<Workspace>(() => {
     const deselected = parseDeselected(raw);
@@ -81,8 +89,10 @@ export function WorkspaceProvider({
       allState: selectAllState(sources, deselected),
       setAll: (selected) =>
         save(selected ? new Set() : new Set(sources.filter((s) => s.status === "ready").map((s) => s.id))),
+      ask,
+      registerAsk,
     };
-  }, [key, notebookId, raw, sources]);
+  }, [ask, key, notebookId, raw, registerAsk, sources]);
 
   return <WorkspaceContext value={value}>{children}</WorkspaceContext>;
 }

@@ -24,7 +24,13 @@ export type SourceSummary = {
   error: string | null;
   pageCount: number | null;
   createdAt: string;
+  // US-14
+  summary: string | null;
+  keyTopics: string[];
+  summaryStatus: SummaryStatus;
 };
+
+export type SummaryStatus = "none" | "pending" | "ready" | "failed";
 
 export type PdfUploadRequest = { fileName: string; size: number; type: string };
 
@@ -114,7 +120,7 @@ export async function listSources(
 ): Promise<SourceSummary[]> {
   const { data, error } = await supabase
     .from("sources")
-    .select("id, title, type, status, error, page_count, created_at")
+    .select("id, title, type, status, error, page_count, created_at, summary, key_topics, summary_status")
     .eq("notebook_id", parseId(notebookId, "Notebook"))
     .order("created_at", { ascending: true });
   if (error) throw error;
@@ -127,6 +133,9 @@ export async function listSources(
     error: row.error,
     pageCount: row.page_count,
     createdAt: row.created_at,
+    summary: row.summary,
+    keyTopics: row.key_topics,
+    summaryStatus: row.summary_status as SummaryStatus,
   }));
 }
 
