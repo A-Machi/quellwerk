@@ -37,15 +37,15 @@ Der Name „NotebookLM“ ist eine Marke von Google und darf nicht verwendet wer
 
 ### V-03 – Supabase-Projekt einrichten
 - [x] Projekt in einer EU-Region angelegt: Frankfurt (eu-central-1)
-- [ ] Supabase CLI installiert (`npm i -D supabase`, MIT), Projekt mit `supabase link` verbunden, **ohne** `supabase start`
-- [ ] Erste Migration über `supabase db push`:
+- [x] Supabase CLI installiert (`npm i -D supabase`, v3.0.0, MIT), Projekt mit `supabase link` verbunden, **ohne** `supabase start`
+- [x] Erste Migration über `supabase db push --remote` (`supabase/migrations/20261107154610_initial_schema.sql`):
   - Extension `vector` aktiviert
   - Tabellen `notebooks`, `sources`, `chunks`, `messages`, jeweils mit `user_id`
   - `chunks.embedding vector(1024)` passend zu bge-m3, HNSW-Index darauf
   - Postgres-Funktion `match_chunks(query_embedding, source_ids, match_count)` für die Ähnlichkeitssuche
-- [ ] **Row Level Security** auf allen Tabellen: Nutzer sieht nur Zeilen mit eigener `user_id`
-- [ ] Privater Storage-Bucket `sources` mit Policies (Zugriff nur auf eigene Dateien)
-- [ ] Auth: E-Mail-Login aktiviert, **öffentliche Registrierung deaktiviert**, eigener Nutzer im Dashboard angelegt
+- [x] **Row Level Security** auf allen Tabellen: Nutzer sieht nur Zeilen mit eigener `user_id`. Supabase-Advisor: 0 Sicherheitswarnungen.
+- [x] Privater Storage-Bucket `sources` mit Policies (Zugriff nur auf eigene Dateien, PDF und Text, max. 50 MB)
+- [x] Auth: E-Mail-Login aktiviert, **öffentliche Registrierung deaktiviert**, anonyme Logins aus, eigener Nutzer im Dashboard angelegt und bestätigt
 
 ### V-04 – Cloudflare Workers AI einrichten
 - [ ] API-Token erstellt, der **nur** die Berechtigung „Workers AI“ hat

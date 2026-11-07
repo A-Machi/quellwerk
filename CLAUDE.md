@@ -26,6 +26,10 @@ Die Dienste selbst sind proprietär. Das ist eine bewusste Entscheidung vom 2026
 
 Weitere Dienste nur nach Rückfrage beim Nutzer.
 
+**Konkrete Projekte:**
+- Supabase: Projekt `quellwerk`, ID `meahuhecbyuswfkyelgq`, Region Frankfurt (eu-central-1), Org „A-Machi's Org“ (Free). „Automatically expose new tables“ ist aus, darum braucht jede neue Tabelle ausdrückliche `GRANT`s in der Migration.
+- Vercel: Projekt `quellwerk` im Team „A-Team“ (Hobby), verbunden mit `A-Machi/quellwerk`, deployt `main` automatisch.
+
 ## Verboten
 
 - Zahlungsmittel hinterlegen, Paid Plan, Pay-as-you-go, Testphasen mit Karte
@@ -65,7 +69,13 @@ Weitere Dienste nur nach Rückfrage beim Nutzer.
 | Embeddings | Workers AI `@cf/baai/bge-m3` (mehrsprachig, 1024 Dimensionen) | MIT |
 | AI-Anbindung | Vercel AI SDK (`ai`) + `@ai-sdk/openai-compatible` gegen den OpenAI-kompatiblen Endpoint von Workers AI | Apache-2.0 |
 | PDF | unpdf oder pdfjs-dist (Extraktion), react-pdf (Anzeige) | MIT / Apache-2.0 |
-| DB-Migrationen | SQL-Dateien in `supabase/migrations`, angewendet mit Supabase CLI (`supabase link`, `supabase db push`, ohne Docker) | MIT |
+| DB-Migrationen | SQL-Dateien in `supabase/migrations`, angewendet mit Supabase CLI v3 (ohne Docker, immer mit `--remote`) | MIT |
+
+**Supabase CLI v3 (Projekt ist verlinkt):**
+- Neue Migration: `npx supabase migration new <name>`
+- Einspielen: erst `npx supabase db push --remote --dry-run`, dann `--yes` (ändert die Produktiv-DB, nur nach Freigabe des Nutzers)
+- Lesen/prüfen: `npx supabase db query --remote --read-only "<sql>"`
+- Sicherheitsprüfung nach jeder Migration: `npx supabase db advisors --remote --type security`
 
 Modellnamen bei Cloudflare ändern sich. Vor dem Einbau die aktuelle Modellliste prüfen.
 

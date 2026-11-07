@@ -29,6 +29,7 @@ Stand: 2026-11-07
 | typescript | 5.9.3 | Apache-2.0 | Entwicklung | https://github.com/microsoft/TypeScript |
 | eslint | 9.39.5 | MIT | Entwicklung | https://github.com/eslint/eslint |
 | eslint-config-next | 16.4.5 | MIT | Entwicklung | https://github.com/vercel/next.js |
+| supabase (CLI) | 3.0.0 | MIT | Entwicklung | https://github.com/supabase/cli |
 | @types/node, @types/react, @types/react-dom | 20.x / 19.x | MIT | Entwicklung | https://github.com/DefinitelyTyped/DefinitelyTyped |
 
 Die UI-Komponenten unter `src/frontend/components/ui/` stammen aus shadcn/ui (MIT) und wurden ins Projekt kopiert.
@@ -41,11 +42,11 @@ Die UI-Komponenten unter `src/frontend/components/ui/` stammen aus shadcn/ui (MI
 
 ## Transitive Abhängigkeiten (Prüfung 2026-11-07)
 
-Alle 642 Einträge aus `package-lock.json` geprüft (inkl. optionaler Plattform-Pakete). **Keine GPL, keine AGPL, kein Paket ohne Lizenzangabe.**
+Alle 657 Einträge aus `package-lock.json` geprüft (inkl. optionaler Plattform-Pakete). **Keine GPL, keine AGPL, kein Paket ohne Lizenzangabe.**
 
 | Lizenz | Anzahl | Bewertung |
 |---|---|---|
-| MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, BlueOak-1.0.0, CC0-1.0, Python-2.0 | 613 | ✅ erlaubt |
+| MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, BlueOak-1.0.0, CC0-1.0, Python-2.0 | 628 | ✅ erlaubt |
 | CC-BY-4.0 (`caniuse-lite`, Browserdaten) | 1 | ✅ erlaubt, Namensnennung ist im Paket enthalten |
 | AFL-2.1 OR BSD-3-Clause (`json-schema`) | 1 | ✅ wir nutzen es unter BSD-3-Clause |
 | MPL-2.0 (`lightningcss`, `axe-core`) | 13 | ⚠️ erlaubt, nur Build- und Lint-Werkzeuge, unverändert genutzt |
