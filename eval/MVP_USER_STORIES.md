@@ -226,12 +226,12 @@ Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen
 
 ---
 
-## Offene Entscheidungen
+## Entscheidungen
 
-| # | Frage | Optionen | Empfehlung |
+| # | Frage | Optionen | Entscheidung |
 |---|---|---|---|
 | 1 | Projektname | – | ✅ Quellwerk |
 | 2 | Chat-Modell | gpt-oss-20b · Mistral Small 3.1 · weitere | ✅ gpt-oss-20b |
-| 3 | Text-Quellen im MVP | Ja (US-08) · später | Ja, kleiner Aufwand |
+| 3 | Text-Quellen im MVP | Ja (US-08) · später | offen (Empfehlung: ja, kleiner Aufwand) |
 | 4 | Eigene Projekt-Lizenz | MIT · Apache-2.0 | ✅ MIT |
 | 5 | Supabase-Region | Frankfurt · andere EU-Region | ✅ Frankfurt |
