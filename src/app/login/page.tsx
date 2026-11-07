@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { signInAction } from "@/app/auth-actions";
 import { LoginForm } from "@/frontend/components/auth/login-form";
+import { ThemeToggle } from "@/frontend/components/theme-toggle";
 import {
   Card,
   CardContent,
@@ -15,7 +16,10 @@ export const metadata: Metadata = { title: "Anmelden · Quellwerk" };
 // US-00: Login. Registrierung ist in Supabase ausgeschaltet.
 export default function LoginPage() {
   return (
-    <main className="flex min-h-dvh items-center justify-center px-4">
+    <main className="relative flex min-h-dvh items-center justify-center px-4">
+      <div className="absolute top-3 right-3">
+        <ThemeToggle />
+      </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">Quellwerk</CardTitle>

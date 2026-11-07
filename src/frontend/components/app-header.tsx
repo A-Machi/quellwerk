@@ -1,6 +1,7 @@
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 
+import { ThemeToggle } from "@/frontend/components/theme-toggle";
 import { Button } from "@/frontend/components/ui/button";
 
 // Kopfzeile aller eingeloggten Seiten. `children` steht rechts neben dem Logo,
@@ -25,6 +26,7 @@ export function AppHeader({
       ) : (
         <div className="flex-1" />
       )}
+      <ThemeToggle />
       <form action={signOutAction}>
         <Button type="submit" variant="ghost" size="sm">
           <LogOut />
