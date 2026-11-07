@@ -29,7 +29,7 @@ Der Name „NotebookLM“ ist eine Marke von Google und darf nicht verwendet wer
 - [x] Name in `package.json`, UI-Titel und README verwendet
 
 ### V-02 – Accounts anlegen, ohne Zahlungsmittel
-- [ ] GitHub-Account, privates Repository für das Projekt (eigenes Repo für Quellwerk, Account A-Machi vorhanden, Repo fehlt noch)
+- [x] GitHub-Account, privates Repository für das Projekt: https://github.com/A-Machi/quellwerk
 - [x] Vercel-Account (Hobby), mit GitHub verbunden
 - [x] Supabase-Account (Free)
 - [x] Cloudflare-Account (Free)
@@ -61,7 +61,8 @@ Der Name „NotebookLM“ ist eine Marke von Google und darf nicht verwendet wer
 - [x] AI SDK (`ai` + `@ai-sdk/openai-compatible`) gegen Workers AI angebunden (Test mit echtem Token folgt in V-04)
 - [x] Leeres 3-Spalten-Layout: Quellen · Chat · (Platzhalter Studio)
 - [x] Ordnerstruktur `src/app` · `src/frontend` · `src/backend`, Backend mit `server-only` geschützt
-- [ ] Repo in Vercel importiert, Env-Variablen in Vercel gesetzt, erstes Deployment erreichbar
+- [x] Repo in Vercel importiert (Team A-Team, Hobby), erstes Deployment erreichbar
+- [ ] Env-Variablen in Vercel gesetzt (folgt nach V-03 und V-04)
 
 ### V-06 – Konfiguration und Lizenzen
 - [x] `.env.example` mit `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CHAT_MODEL`, `EMBEDDING_MODEL`

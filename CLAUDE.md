@@ -87,6 +87,13 @@ src/
 
 `npm run dev` · `npm run build` · `npm run lint` · `npx tsc --noEmit`
 
+## Git
+
+- Repo: https://github.com/A-Machi/quellwerk (privat, Branch `main`). Commits mit der GitHub-noreply-Adresse von A-Machi, nie mit der Firmen-E-Mail.
+- `gh` muss auf den Account **A-Machi** geschaltet sein (`gh auth switch -u A-Machi`), nicht auf den Firmen-Account.
+- **Conventional Commits** ohne ID und ohne Scope: `feat: …`, `fix: …`, `docs: …`, `chore: …`, `refactor: …`, `style: …`, `test: …`. Also nicht `feat(US-01): …` oder `feat: [US-01] …`.
+- Beschreibung auf Deutsch.
+
 ## Next.js-Version
 
 @AGENTS.md
