@@ -284,17 +284,17 @@ Die Werte werden in V-07 gemessen und hier ersetzt.
 - [ ] Tabelle „Kosten-Schätzung“ oben mit den gemessenen Werten aktualisieren
 
 ### V-08 – Datenbank erweitern (Migration)
-- [ ] `sources`: Spalten `summary text`, `key_topics text[]`, `summary_status` (`none` · `pending` · `ready` · `failed`)
-- [ ] Neue Tabelle `notes`: Notizen und Studio-Ausgaben in einer Tabelle (siehe Entscheidung 3)
+- [x] `sources`: Spalten `summary text`, `key_topics text[]`, `summary_status` (`none` · `pending` · `ready` · `failed`)
+- [x] Neue Tabelle `notes`: Notizen und Studio-Ausgaben in einer Tabelle (siehe Entscheidung 3)
   - `id`, `notebook_id`, `user_id`, `kind` (`note` · `study_guide` · `faq` · `briefing` · `timeline`), `title`, `content` (Markdown), `citations jsonb`, `source_ids uuid[]`, `created_at`, `updated_at`
-- [ ] Neue Tabelle `usage_log`: `id`, `user_id`, `kind` (`chat` · `rewrite` · `embedding` · `summary` · `studio`), `neurons numeric`, `created_at`
-- [ ] Für Hybrid-Suche (US-20): Spalte `chunks.fts tsvector` (generiert) mit GIN-Index
-- [ ] RLS, Policies und GRANTs wie bei den bestehenden Tabellen
-- [ ] Supabase-Advisor: 0 Sicherheitswarnungen
+- [x] Neue Tabelle `usage_log`: `id`, `user_id`, `kind` (`chat` · `rewrite` · `embedding` · `summary` · `studio`), `neurons numeric`, `created_at`
+- [x] Für Hybrid-Suche (US-20): Spalte `chunks.fts tsvector` (generiert) mit GIN-Index
+- [x] RLS, Policies und GRANTs wie bei den bestehenden Tabellen
+- [x] Supabase-Advisor: 0 Sicherheitswarnungen
 
 ### V-09 – Verbrauch zentral erfassen
-- [ ] Jeder Aufruf von Workers AI (Chat, Umformulieren, Embeddings, Zusammenfassung, Studio) schreibt `usage.neurons` in `usage_log`
-- [ ] Embeddings melden keinen Verbrauch: dort aus Token-Zahl und Preis schätzen und als geschätzt markieren
+- [x] Jeder Aufruf von Workers AI (Chat, Umformulieren, Embeddings, Zusammenfassung, Studio) schreibt `usage.neurons` in `usage_log`
+- [x] Embeddings melden keinen Verbrauch: dort aus Token-Zahl und Preis schätzen und als geschätzt markieren
 
 ---
 
@@ -377,10 +377,10 @@ Als Nutzer möchte ich, dass der Chat auch exakte Begriffe wie Namen, Nummern od
 
 #### US-21 – Tagesverbrauch anzeigen · S · Should
 Als Nutzer möchte ich sehen, wie viel vom Tageskontingent von Workers AI schon verbraucht ist, damit ich nicht überrascht werde, wenn nichts mehr geht.
-- [ ] Anzeige in der Kopfzeile, z. B. „KI heute: 1.240 / 10.000“
-- [ ] Farbe wechselt ab 80 % auf Warnung
-- [ ] Zählt ab 0:00 UTC, so wie Cloudflare das Kontingent zurücksetzt (prüfen)
-- [ ] Hinweis, dass Embeddings geschätzt sind
+- [x] Anzeige in der Kopfzeile, z. B. „KI heute: 1.240 / 10.000“
+- [x] Farbe wechselt ab 80 % auf Warnung
+- [x] Zählt ab 0:00 UTC, so wie Cloudflare das Kontingent zurücksetzt (prüfen)
+- [x] Hinweis, dass Embeddings geschätzt sind
 
 *Braucht:* V-09
 

@@ -8,9 +8,11 @@ import { Button } from "@/frontend/components/ui/button";
 // z. B. der Notebook-Titel.
 export function AppHeader({
   signOutAction,
+  usage,
   children,
 }: {
   signOutAction: () => Promise<void>;
+  usage?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   return (
@@ -26,6 +28,7 @@ export function AppHeader({
       ) : (
         <div className="flex-1" />
       )}
+      {usage}
       <ThemeToggle />
       <form action={signOutAction}>
         <Button type="submit" variant="ghost" size="sm">

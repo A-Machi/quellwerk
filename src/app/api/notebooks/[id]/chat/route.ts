@@ -1,4 +1,5 @@
 import { createWorkersAiEmbedder } from "@/backend/ai/embeddings";
+import { createUsageRecorder } from "@/backend/ai/usage";
 import { getSession } from "@/backend/auth";
 import { createWorkersAiLlm } from "@/backend/chat/llm";
 import { encodeChatEvent, type ChatEvent } from "@/backend/chat/protocol";
@@ -16,10 +17,15 @@ export async function POST(request: Request, ctx: RouteContext<"/api/notebooks/[
   const { id } = await ctx.params;
   const body = await request.json().catch(() => null);
 
+  const recordUsage = createUsageRecorder(session.supabase);
   let prepared;
   try {
     prepared = await prepareAnswer(
-      { supabase: session.supabase, embed: createWorkersAiEmbedder(), llm: createWorkersAiLlm() },
+      {
+        supabase: session.supabase,
+        embed: createWorkersAiEmbedder(recordUsage),
+        llm: createWorkersAiLlm(recordUsage),
+      },
       id,
       body,
     );

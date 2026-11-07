@@ -1,4 +1,5 @@
 import { createWorkersAiEmbedder } from "@/backend/ai/embeddings";
+import { createUsageRecorder } from "@/backend/ai/usage";
 import { getSession } from "@/backend/auth";
 import { toActionError } from "@/backend/errors";
 import { processSource } from "@/backend/ingestion/pipeline";
@@ -13,7 +14,7 @@ export async function POST(_request: Request, ctx: RouteContext<"/api/sources/[i
   const { id } = await ctx.params;
   try {
     const result = await processSource(
-      { supabase: session.supabase, embed: createWorkersAiEmbedder() },
+      { supabase: session.supabase, embed: createWorkersAiEmbedder(createUsageRecorder(session.supabase)) },
       id,
     );
     return Response.json(result);

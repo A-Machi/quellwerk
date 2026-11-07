@@ -20,6 +20,7 @@ export type Database = {
           content: string
           created_at: string
           embedding: string
+          fts: unknown
           id: string
           page_number: number | null
           source_id: string
@@ -31,6 +32,7 @@ export type Database = {
           content: string
           created_at?: string
           embedding: string
+          fts?: unknown
           id?: string
           page_number?: number | null
           source_id: string
@@ -42,6 +44,7 @@ export type Database = {
           content?: string
           created_at?: string
           embedding?: string
+          fts?: unknown
           id?: string
           page_number?: number | null
           source_id?: string
@@ -120,15 +123,65 @@ export type Database = {
         }
         Relationships: []
       }
+      notes: {
+        Row: {
+          citations: Json
+          content: string
+          created_at: string
+          id: string
+          kind: string
+          notebook_id: string
+          source_ids: string[]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          citations?: Json
+          content: string
+          created_at?: string
+          id?: string
+          kind: string
+          notebook_id: string
+          source_ids?: string[]
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          citations?: Json
+          content?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          notebook_id?: string
+          source_ids?: string[]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_notebook_id_fkey"
+            columns: ["notebook_id"]
+            isOneToOne: false
+            referencedRelation: "notebooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sources: {
         Row: {
           created_at: string
           error: string | null
           id: string
+          key_topics: string[]
           notebook_id: string
           page_count: number | null
           status: string
           storage_path: string
+          summary: string | null
+          summary_status: string
           title: string
           type: string
           updated_at: string
@@ -138,10 +191,13 @@ export type Database = {
           created_at?: string
           error?: string | null
           id?: string
+          key_topics?: string[]
           notebook_id: string
           page_count?: number | null
           status?: string
           storage_path: string
+          summary?: string | null
+          summary_status?: string
           title: string
           type: string
           updated_at?: string
@@ -151,10 +207,13 @@ export type Database = {
           created_at?: string
           error?: string | null
           id?: string
+          key_topics?: string[]
           notebook_id?: string
           page_count?: number | null
           status?: string
           storage_path?: string
+          summary?: string | null
+          summary_status?: string
           title?: string
           type?: string
           updated_at?: string
@@ -169,6 +228,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      usage_log: {
+        Row: {
+          created_at: string
+          estimated: boolean
+          id: string
+          kind: string
+          neurons: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          estimated?: boolean
+          id?: string
+          kind: string
+          neurons: number
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          estimated?: boolean
+          id?: string
+          kind?: string
+          neurons?: number
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -190,6 +276,24 @@ export type Database = {
           source_id: string
         }[]
       }
+      match_chunks_hybrid: {
+        Args: {
+          match_count?: number
+          query_embedding: string
+          query_terms: string[]
+          source_ids: string[]
+        }
+        Returns: {
+          chunk_index: number
+          content: string
+          id: string
+          page_number: number
+          score: number
+          similarity: number
+          source_id: string
+        }[]
+      }
+      usage_today: { Args: never; Returns: number }
     }
     Enums: {
       [_ in never]: never

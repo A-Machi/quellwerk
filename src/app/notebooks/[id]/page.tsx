@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { signOutAction } from "@/app/auth-actions";
+import { UsageBadge } from "@/app/usage-badge";
 import { renameNotebookAction } from "@/app/notebook-actions";
 import {
   clearChatAction,
@@ -63,7 +64,14 @@ async function NotebookView({
           />
         }
         header={
-          <AppHeader signOutAction={signOutAction}>
+          <AppHeader
+            signOutAction={signOutAction}
+            usage={
+              <Suspense fallback={null}>
+                <UsageBadge />
+              </Suspense>
+            }
+          >
             <NotebookTitle
               key={notebook.title}
               notebookId={notebook.id}

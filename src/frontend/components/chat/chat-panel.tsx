@@ -1,6 +1,7 @@
 "use client";
 
 import { Send, Sparkles, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { Citation } from "@/backend/chat/prompt";
@@ -36,6 +37,7 @@ export function ChatPanel({
   actions: ChatActions;
 }) {
   const { notebookId, selectedIds, sources } = useWorkspace();
+  const router = useRouter();
   const [messages, setMessages] = useState<UiMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -126,6 +128,8 @@ export function ChatPanel({
         ),
       );
       setBusy(false);
+      // Tagesverbrauch in der Kopfzeile aktualisieren
+      router.refresh();
     }
   }
 

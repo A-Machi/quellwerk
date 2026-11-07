@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
 import { signOutAction } from "@/app/auth-actions";
+import { UsageBadge } from "@/app/usage-badge";
 import {
   createNotebookAction,
   deleteNotebookAction,
@@ -17,7 +18,14 @@ import { Skeleton } from "@/frontend/components/ui/skeleton";
 export default function HomePage() {
   return (
     <div className="flex min-h-dvh flex-col">
-      <AppHeader signOutAction={signOutAction} />
+      <AppHeader
+        signOutAction={signOutAction}
+        usage={
+          <Suspense fallback={null}>
+            <UsageBadge />
+          </Suspense>
+        }
+      />
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-2xl font-semibold">Notebooks</h1>
