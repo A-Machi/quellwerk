@@ -1,4 +1,6 @@
-# MVP – User Stories und Voraussetzungen
+# User Stories und Voraussetzungen
+
+Teil 1: MVP (Sprint 0 bis 4) · Teil 2: [Phase 2](#phase-2--studio-notizen-und-bessere-suche) (Sprint 5 bis 8)
 
 Stand: 2026-11-07 · Grundlage: [CLAUDE.md](../CLAUDE.md) (Open Source, keine Kosten, keine Lizenzverstöße, alles in der Cloud)
 
@@ -235,3 +237,185 @@ Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen
 | 3 | Text-Quellen im MVP | Ja (US-08) · später | ✅ Ja |
 | 4 | Eigene Projekt-Lizenz | MIT · Apache-2.0 | ✅ MIT |
 | 5 | Supabase-Region | Frankfurt · andere EU-Region | ✅ Frankfurt |
+
+---
+
+# Phase 2 – Studio, Notizen und bessere Suche
+
+Entschieden am 2026-11-07: Phase 2 wird komplett umgesetzt, bei offenen Fragen gilt jeweils die Empfehlung.
+
+## Phase 2 · Ziel
+
+Phase 2 füllt die Studio-Spalte und macht Quellen schneller verständlich:
+Zusammenfassungen pro Quelle, Studio-Ausgaben (Study Guide, FAQ, Briefing, Zeitleiste), Notizen und eine bessere Suche.
+
+Nicht in Phase 2: Audio Overview (Podcast), Teilen mit anderen Nutzern, weitere Quellentypen wie URLs. Das bleibt Phase 3.
+
+## Phase 2 · Das Free-Tier-Limit als wichtigste Randbedingung
+
+Workers AI erlaubt **10.000 Neurons pro Tag**. Im MVP kostet eine Chat-Frage etwa 130 Neurons, weil nur 8 Abschnitte ans Modell gehen. Studio-Funktionen lesen deutlich mehr Text. Deshalb gilt für Phase 2:
+
+- **Einmal erzeugen, dann speichern.** Zusammenfassungen und Studio-Ausgaben werden in der Datenbank abgelegt und nicht bei jedem Öffnen neu berechnet.
+- **Große Dokumente nicht komplett lesen.** Statt des ganzen Textes gehen ausgewählte Abschnitte und vorhandene Zusammenfassungen ans Modell.
+- **Verbrauch sichtbar machen** (US-21), damit man sieht, wie viel vom Tag noch übrig ist.
+
+### Kosten-Schätzung (gpt-oss-20b, noch nicht gemessen)
+
+Grundlage: Preis laut Cloudflare-API (0,20 $ pro 1 Mio. Input-Token, 0,30 $ pro 1 Mio. Output-Token) und 1.000 Neurons = 0,011 $. Daraus ergeben sich etwa **18 Neurons pro 1.000 Input-Token** und **27 Neurons pro 1.000 Output-Token**. Reasoning-Token zählen zum Output.
+
+| Vorgang | Input | Output | Neurons (geschätzt) | pro Tag möglich |
+|---|---|---|---|---|
+| Chat-Frage (MVP, gemessen) | ca. 7.000 Token | ca. 300 Token | **127** | ca. 75 |
+| Zusammenfassung, ganzes OWASP-PDF (122 Seiten) | ca. 57.000 Token | ca. 800 Token | ca. 1.060 | ca. 9 |
+| Zusammenfassung mit Auswahl (max. 12.000 Token) | ca. 12.000 Token | ca. 800 Token | **ca. 240** | ca. 40 |
+| Studio-Ausgabe aus Zusammenfassungen + 8 Abschnitten | ca. 9.000 Token | ca. 1.500 Token | **ca. 205** | ca. 45 |
+| Umformulieren einer Folgefrage (MVP) | ca. 300 Token | ca. 50 Token | ca. 7 | – |
+
+Die Werte werden in V-07 gemessen und hier ersetzt.
+
+---
+
+## Phase 2 · Teil A – Was vorher stehen muss
+
+### V-07 – Verbrauch messen
+- [ ] Zusammenfassung des OWASP-PDFs einmal mit allen Abschnitten und einmal mit Auswahl (12.000 Token) erzeugen und `usage.neurons` notieren
+- [ ] Studio-Ausgabe (FAQ) aus Zusammenfassungen und 8 Abschnitten erzeugen und messen
+- [ ] Qualität beider Varianten der Zusammenfassung vergleichen. Daraus folgt Entscheidung 2.
+- [ ] Tabelle „Kosten-Schätzung“ oben mit den gemessenen Werten aktualisieren
+
+### V-08 – Datenbank erweitern (Migration)
+- [ ] `sources`: Spalten `summary text`, `key_topics text[]`, `summary_status` (`none` · `pending` · `ready` · `failed`)
+- [ ] Neue Tabelle `notes`: Notizen und Studio-Ausgaben in einer Tabelle (siehe Entscheidung 3)
+  - `id`, `notebook_id`, `user_id`, `kind` (`note` · `study_guide` · `faq` · `briefing` · `timeline`), `title`, `content` (Markdown), `citations jsonb`, `source_ids uuid[]`, `created_at`, `updated_at`
+- [ ] Neue Tabelle `usage_log`: `id`, `user_id`, `kind` (`chat` · `rewrite` · `embedding` · `summary` · `studio`), `neurons numeric`, `created_at`
+- [ ] Für Hybrid-Suche (US-20): Spalte `chunks.fts tsvector` (generiert) mit GIN-Index
+- [ ] RLS, Policies und GRANTs wie bei den bestehenden Tabellen
+- [ ] Supabase-Advisor: 0 Sicherheitswarnungen
+
+### V-09 – Verbrauch zentral erfassen
+- [ ] Jeder Aufruf von Workers AI (Chat, Umformulieren, Embeddings, Zusammenfassung, Studio) schreibt `usage.neurons` in `usage_log`
+- [ ] Embeddings melden keinen Verbrauch: dort aus Token-Zahl und Preis schätzen und als geschätzt markieren
+
+---
+
+## Phase 2 · Teil B – User Stories
+
+Format wie im MVP: *Als Nutzer möchte ich …, damit …* · Größe: S (< 1 Tag), M (1–2 Tage), L (3+ Tage) · Priorität nach MoSCoW
+
+### Epic 5 – Quellen verstehen
+
+#### US-14 – Zusammenfassung pro Quelle · M · Must
+Als Nutzer möchte ich zu jeder Quelle eine kurze Zusammenfassung und die Schlüsselthemen sehen, damit ich schnell weiß, worum es geht, ohne das Dokument zu lesen.
+- [ ] Nach erfolgreicher Verarbeitung wird die Zusammenfassung automatisch erzeugt (siehe Entscheidung 1)
+- [ ] 4–6 Sätze plus 3–6 Schlüsselthemen, auf Deutsch (wie die Oberfläche)
+- [ ] Bei großen Quellen gehen höchstens 12.000 Token ans Modell: Anfang, Ende und gleichmäßig verteilte Abschnitte (siehe Entscheidung 2)
+- [ ] Wird einmal erzeugt und gespeichert, Button „Neu erzeugen“
+- [ ] Klick auf eine Quelle in der Liste klappt Zusammenfassung und Themen auf
+- [ ] Klick auf ein Schlüsselthema stellt im Chat die Frage „Was steht zu ‚Thema‘ in den Quellen?“
+- [ ] Tageslimit erreicht: Quelle bleibt nutzbar, Zusammenfassung zeigt „später erneut versuchen“
+
+*Braucht:* V-07, V-08 · *Kosten:* ca. 240 Neurons pro Quelle, einmalig
+
+### Epic 6 – Studio
+
+#### US-15 – Studio-Ausgabe erzeugen · L · Must
+Als Nutzer möchte ich aus den ausgewählten Quellen per Klick einen Study Guide, ein FAQ, ein Briefing oder eine Zeitleiste erzeugen, damit ich den Inhalt in einer passenden Form lernen oder weitergeben kann.
+- [ ] Studio-Spalte zeigt vier Kacheln: Study Guide, FAQ, Briefing, Zeitleiste
+- [ ] Nutzt die im Chat ausgewählten Quellen (US-07)
+- [ ] Input fürs Modell: Zusammenfassungen der Quellen (US-14) plus passende Abschnitte, max. ca. 9.000 Token
+- [ ] Ausgabe als Markdown mit Quellenangaben `[n]`, Chips wie im Chat (US-12) und Klick zur Stelle (US-13)
+- [ ] Wird gestreamt angezeigt und danach in `notes` gespeichert
+- [ ] Vor dem Erzeugen wird der geschätzte Verbrauch angezeigt („ca. 200 Neurons“)
+- [ ] Zeitleiste: nur Ereignisse mit Datum aus den Quellen, sonst Hinweis „Keine datierten Ereignisse gefunden“
+
+*Braucht:* US-14, V-08 · *Kosten:* ca. 205 Neurons pro Ausgabe
+
+#### US-16 – Studio-Ausgaben verwalten · S · Must
+Als Nutzer möchte ich erzeugte Ausgaben wieder öffnen, löschen und kopieren, damit ich sie nicht neu erzeugen muss.
+- [ ] Liste der Ausgaben unter den Kacheln mit Typ, Titel und Datum
+- [ ] Öffnen in einer größeren Ansicht, Löschen mit Bestätigung
+- [ ] „Als Markdown kopieren“ in die Zwischenablage
+- [ ] „Neu erzeugen“ mit den aktuell ausgewählten Quellen
+
+*Braucht:* US-15
+
+### Epic 7 – Notizen
+
+#### US-17 – Chat-Antwort als Notiz speichern · S · Must
+Als Nutzer möchte ich eine gute Antwort aus dem Chat als Notiz behalten, damit sie nicht verloren geht, wenn ich den Chat leere.
+- [ ] Button „Als Notiz speichern“ unter jeder Antwort
+- [ ] Notiz behält Text und Quellenangaben, Titel aus der Frage
+- [ ] Erscheint in der Studio-Spalte bei den Notizen
+
+*Braucht:* V-08
+
+#### US-18 – Eigene Notizen schreiben · M · Should
+Als Nutzer möchte ich eigene Notizen anlegen, bearbeiten und löschen, damit ich Gedanken direkt neben den Quellen festhalten kann.
+- [ ] Neue Notiz mit Titel und Markdown-Text, Vorschau beim Lesen
+- [ ] Bearbeiten und Löschen mit Bestätigung
+- [ ] Gespeichert pro Notebook, nur für den eigenen Nutzer sichtbar (RLS)
+
+*Braucht:* V-08
+
+#### US-19 – Notiz als Quelle verwenden · S · Could
+Als Nutzer möchte ich eine Notiz in eine Quelle umwandeln, damit der Chat sie bei Antworten berücksichtigt.
+- [ ] Button „Als Quelle hinzufügen“ an einer Notiz
+- [ ] Wird wie eine Text-Quelle (US-08) verarbeitet
+
+*Braucht:* US-18, US-08 · *Kosten:* Embeddings, vernachlässigbar
+
+### Epic 8 – Suche und Verbrauch
+
+#### US-20 – Hybrid-Suche · M · Should
+Als Nutzer möchte ich, dass der Chat auch exakte Begriffe wie Namen, Nummern oder Abkürzungen zuverlässig findet, damit Fragen wie „Was steht zu LLM05?“ funktionieren.
+- [ ] Suche kombiniert Vektorsuche (bge-m3) und Volltextsuche (Postgres `tsvector`)
+- [ ] Ergebnisse werden per Reciprocal Rank Fusion zusammengeführt
+- [ ] Testfragen mit exakten Begriffen aus dem OWASP-PDF (z. B. „LLM05“, „Improper Output Handling“) finden den richtigen Abschnitt unter den Top 3
+- [ ] Keine zusätzlichen Neurons (Volltextsuche läuft in der Datenbank)
+
+*Braucht:* V-08 · *Kosten:* 0 Neurons
+
+#### US-21 – Tagesverbrauch anzeigen · S · Should
+Als Nutzer möchte ich sehen, wie viel vom Tageskontingent von Workers AI schon verbraucht ist, damit ich nicht überrascht werde, wenn nichts mehr geht.
+- [ ] Anzeige in der Kopfzeile, z. B. „KI heute: 1.240 / 10.000“
+- [ ] Farbe wechselt ab 80 % auf Warnung
+- [ ] Zählt ab 0:00 UTC, so wie Cloudflare das Kontingent zurücksetzt (prüfen)
+- [ ] Hinweis, dass Embeddings geschätzt sind
+
+*Braucht:* V-09
+
+---
+
+## Phase 2 · Teil C – Vorschlag für die Reihenfolge
+
+```
+Sprint 5   Grundlage      V-07, V-08, V-09, US-21
+Sprint 6   Quellen        US-14, US-20
+Sprint 7   Studio         US-15, US-16
+Sprint 8   Notizen        US-17, US-18, US-19 (Could)
+```
+
+Begründung: Die Verbrauchsanzeige kommt zuerst, weil Studio-Funktionen das Kontingent spürbar nutzen. Die Zusammenfassungen (US-14) sind die Grundlage für günstige Studio-Ausgaben. Die Hybrid-Suche kostet keine Neurons und verbessert sofort auch den bestehenden Chat.
+
+---
+
+## Phase 2 · Definition of Done
+
+Wie im MVP, zusätzlich:
+- Jede neue KI-Funktion schreibt ihren Verbrauch in `usage_log`
+- Gemessener Verbrauch steht in der Kosten-Tabelle oben
+- Integrationstests mit Fake-Modell, dazu mindestens ein Test mit dem echten Modell (`RUN_AI_TESTS=1`)
+
+---
+
+## Phase 2 · Entscheidungen
+
+| # | Frage | Optionen | Empfehlung | Entscheidung |
+|---|---|---|---|---|
+| 1 | Wann wird die Zusammenfassung erzeugt? | automatisch nach der Verarbeitung · erst beim ersten Aufklappen | automatisch, dann ist sie sofort da | ✅ automatisch |
+| 2 | Wie viel Text geht in die Zusammenfassung? | ganzes Dokument · Auswahl bis 12.000 Token | Auswahl, nach Messung in V-07 bestätigen | ✅ Auswahl bis 12.000 Token |
+| 3 | Notizen und Studio-Ausgaben speichern | eine Tabelle `notes` mit `kind` · zwei Tabellen | eine Tabelle, einfacher | ✅ eine Tabelle `notes` |
+| 4 | Welche Studio-Ausgaben zuerst? | Study Guide · FAQ · Briefing · Zeitleiste | FAQ und Briefing zuerst, Zeitleiste zuletzt | ✅ alle vier, Reihenfolge FAQ, Briefing, Study Guide, Zeitleiste |
+| 5 | Sprache der Volltextsuche | `german` (Wortstämme) · `simple` (exakte Wörter) | `simple`, weil viele Quellen englisch oder gemischt sind | ✅ `simple`, Stoppwörter filtert die App |
+| 6 | Verbrauchsanzeige (US-21) | ja · nein | ja | ✅ ja |
+| 7 | Reihenfolge der Sprints | wie in Teil C · andere | wie in Teil C | ✅ wie in Teil C |
