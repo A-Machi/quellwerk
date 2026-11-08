@@ -1,201 +1,194 @@
-# NotebookLM-Klon – Evaluation
+# Quellwerk – Evaluation und Ergebnis
 
-Ziel dieses Dokuments ist, vor dem ersten Code zu klären, **was** wir bauen (Scope), **womit** (Tech Stack) und **welche offenen Entscheidungen** es noch gibt. Ausgangspunkt ist der vorgeschlagene Stack; zu jedem Punkt steht eine Bewertung und, wo sinnvoll, eine Alternative.
+Am Anfang stand ein Stack-Vorschlag mit Gemini, Vercel und Supabase Cloud. Mit den Projektregeln (nur Open Source, keine Kosten, alles in der Cloud) hat sich der Stack geändert. Dieses Dokument hält fest, was evaluiert wurde, wie entschieden wurde und was am Ende gebaut ist.
 
-Status: Entwurf · Stand: 2026-11-07
+Stand: 2026-11-08 · MVP und Phase 2 sind umgesetzt und live unter https://quellwerk.vercel.app
 
-> **Teilweise überholt (2026-11-07).** Verbindlich ist [CLAUDE.md](../CLAUDE.md). Gemini fällt weg, weil es proprietär ist. Stattdessen laufen offene Modelle über Cloudflare Workers AI Free, und die Embeddings kommen von bge-m3 mit 1024 statt 768 Dimensionen. Vercel Hobby und Supabase Free bleiben, Docker wird nicht genutzt. Weiter gültig sind die Hinweise zum Upload-Limit (2.4), zum Chunking (2.5), zur RAG-Pipeline (3) und zur langen Verarbeitung (4).
+Verbindlich für Regeln und Konfiguration ist [CLAUDE.md](../CLAUDE.md). User Stories, Akzeptanzkriterien und Fortschritt stehen in [MVP_USER_STORIES.md](MVP_USER_STORIES.md).
 
 ---
 
-## 1. Was ist NotebookLM eigentlich? (Feature-Inventar)
+## 1. Feature-Inventar
 
-Bevor wir den Stack bewerten, müssen wir wissen, welche Features wir nachbauen wollen.
-
-| Feature | Beschreibung | MVP? |
+| Feature | Beschreibung | Stand |
 |---|---|---|
-| Notebooks | Projekte, die mehrere Quellen bündeln | ✅ |
-| Quellen hochladen | PDF, später Text, URL, Google Docs, Audio | ✅ (nur PDF + Text) |
-| Quellen-Auswahl | Checkbox pro Quelle, welche in den Chat einfließen | ✅ |
-| Chat mit Quellenangaben | Antwort mit klickbaren Zitaten `[1]`, die zur Textstelle springen | ✅ |
-| Quellen-Zusammenfassung | Automatische Kurzfassung + Schlüsselthemen beim Upload | ✅ |
-| Notizen | Antworten als Notiz speichern, eigene Notizen schreiben | ⚪ Phase 2 |
-| Studio-Ausgaben | Study Guide, FAQ, Briefing, Timeline, Mind Map | ⚪ Phase 2 |
+| Notebooks | Projekte, die mehrere Quellen bündeln | ✅ umgesetzt |
+| Quellen | PDF hochladen, Text einfügen, Notiz als Quelle | ✅ umgesetzt |
+| Weitere Quellentypen | URL, Google Docs, Audio | ⚪ Phase 3 |
+| Quellen-Auswahl | Checkbox pro Quelle, Auswahl bleibt gespeichert | ✅ umgesetzt |
+| Chat mit Quellenangaben | Gestreamte Antwort, Zitate als Chips, Klick öffnet das PDF auf der Seite | ✅ umgesetzt |
+| Chatverlauf | Bleibt nach dem Neuladen, Folgefragen werden verstanden | ✅ umgesetzt |
+| Quellen-Zusammenfassung | Kurzfassung und Schlüsselthemen nach dem Upload | ✅ umgesetzt |
+| Notizen | Antworten speichern, eigene Notizen schreiben | ✅ umgesetzt |
+| Studio | FAQ, Briefing, Study Guide, Zeitleiste | ✅ umgesetzt |
+| Mind Map | Grafische Übersicht der Themen | ⚪ Phase 3 |
 | Audio Overview | Podcast mit zwei Stimmen über die Quellen | ⚪ Phase 3 |
-| Teilen / Kollaboration | Notebook mit anderen teilen | ⚪ Phase 3 |
-| Mehrbenutzer / Login | Jeder sieht nur seine Notebooks | ✅ (wenn öffentlich deployed) |
-
-**Entscheidung offen:** Ist das ein Lernprojekt für mich allein (kein Login nötig) oder soll es öffentlich laufen (Auth + Rate Limits + Kostenkontrolle Pflicht)?
-
----
-
-## 2. Bewertung des vorgeschlagenen Stacks
-
-### 2.1 Frontend
-
-| Komponente | Bewertung | Anmerkung |
-|---|---|---|
-| Next.js 15 | ✅ passt | **Prüfen:** Next.js 16 ist bereits erschienen. Für ein neues Projekt die aktuelle Major-Version nehmen (`create-next-app@latest`). App Router verwenden. |
-| TypeScript | ✅ passt | Strict Mode an. |
-| Tailwind CSS | ✅ passt | Tailwind v4 (CSS-first Config). |
-| shadcn/ui | ✅ passt | Gut für das 3-Spalten-Layout (Quellen · Chat · Studio). `Resizable`, `ScrollArea`, `Dialog`, `Sheet` sind direkt nützlich. |
-
-**Fehlt noch:**
-- **Vercel AI SDK** (`ai` + `@ai-sdk/google`) – Streaming-Chat, `useChat`-Hook, einheitliche API für Gemini. Spart viel Boilerplate.
-- **PDF-Viewer** zum Springen an die zitierte Stelle: `react-pdf` (basiert auf pdfjs-dist).
-- **Markdown-Rendering** der Antworten: `react-markdown` + `remark-gfm`.
-- **State/Data-Fetching:** TanStack Query oder Server Components + Server Actions (reicht wahrscheinlich).
-
-### 2.2 Backend
-
-| Komponente | Bewertung | Anmerkung |
-|---|---|---|
-| Next.js API Routes | ✅ passt mit Einschränkung | Für Chat und kleine Uploads ideal. **Problem:** Lange Verarbeitung großer PDFs (Extrahieren + Embeddings für hunderte Chunks) kann an das Timeout von Vercel Functions stoßen. Siehe Abschnitt 4. |
-| TypeScript | ✅ passt | Typen zwischen Frontend, API und DB teilen (`supabase gen types`). |
-
-**Fehlt noch:**
-- **Validierung:** `zod` für Request-Bodies und LLM-Structured-Output.
-- **Hintergrund-Jobs** für die Ingestion (Optionen in Abschnitt 4).
-
-### 2.3 KI / LLM
-
-| Komponente | Bewertung | Anmerkung |
-|---|---|---|
-| Gemini 2.5 Flash | ✅ passt, aber prüfen | Günstig, schnell, 1M Token Kontext. **Prüfen:** Es gibt neuere Flash-Modelle (Gemini 3 Flash). Beim Start aktuelle Modellliste und Preise auf ai.google.dev checken. Modellname als Env-Variable, damit ein Wechsel nur Config ist. |
-| Gemini Embeddings | ✅ passt | `gemini-embedding-001` liefert standardmäßig 3072 Dimensionen, lässt sich aber auf **768 oder 1536** kürzen (Matryoshka). Wichtig wegen pgvector-Indexlimit, siehe 2.4. `taskType` setzen: `RETRIEVAL_DOCUMENT` beim Speichern, `RETRIEVAL_QUERY` bei der Suche. |
-
-**Wichtige Alternative, die wir bewerten sollten:**
-- **Gemini File Search API** – Google bietet inzwischen managed RAG an (Upload, Chunking, Embeddings, Suche, Zitate). Würde Schritte 2–6 der Pipeline komplett ersetzen. Vorteil: viel weniger Code. Nachteil: weniger Kontrolle, Lock-in, man lernt RAG nicht selbst.
-- **Long Context statt RAG** – Bei kleinen Notebooks (< ca. 200k Token) kann man die Quellen einfach komplett in den Prompt geben (mit Context Caching). Bessere Antworten, kein Retrieval-Fehler. Hybrid denkbar: klein → Full Context, groß → RAG.
-
-**Entscheidung offen:** Eigene RAG-Pipeline (Lerneffekt, Kontrolle) vs. File Search API (Tempo)?
-
-### 2.4 Datenbank & Storage
-
-| Komponente | Bewertung | Anmerkung |
-|---|---|---|
-| Supabase PostgreSQL | ✅ passt | Eine DB für Daten + Vektoren + Auth. |
-| pgvector | ✅ passt | **Achtung:** HNSW-Index unterstützt beim Typ `vector` max. 2000 Dimensionen. Also Embeddings auf 768 oder 1536 kürzen, oder `halfvec` (bis 4000) nutzen. |
-| Supabase Storage | ✅ passt | **Achtung:** Vercel Functions haben ein Body-Limit von ca. 4,5 MB. PDFs deshalb **direkt aus dem Browser** zu Supabase Storage hochladen (Signed Upload URL), nicht durch die API Route schleusen. |
-
-**Fehlt noch:**
-- **Supabase Auth** (falls Login, siehe 1).
-- **Row Level Security (RLS)** auf allen Tabellen, damit Nutzer nur ihre Notebooks sehen.
-- **Volltextsuche** (`tsvector`) für **Hybrid Search** (Vektor + Keyword). Hilft enorm bei Eigennamen, Zahlen, Fachbegriffen, die Embeddings schlecht treffen.
-
-### 2.5 Dokumentenverarbeitung
-
-| Option | Pro | Contra |
-|---|---|---|
-| `pdf-parse` | Einfach, ein Aufruf | Wenig gepflegt, keine Seiteninfos ohne Tricks |
-| `pdfjs-dist` / `unpdf` | Text **pro Seite** → Seitenzahl für Zitate | Etwas mehr Code. `unpdf` ist ein serverless-freundlicher Wrapper. |
-| Gemini direkt (PDF als Input) | Kann auch **gescannte PDFs**, Tabellen, Bilder | Kostet Tokens, langsamer |
-
-**Empfehlung:** `unpdf` (oder `pdfjs-dist`) für normale PDFs, Fallback auf Gemini, wenn kaum Text extrahiert wird (Scan erkannt).
-
-**Chunking-Logik – zu entscheiden:**
-- Chunk-Größe: Startwert ca. 800–1000 Token, 10–15 % Overlap
-- An Absatz- und Satzgrenzen schneiden, nicht mitten im Wort
-- Pro Chunk speichern: `source_id`, `page_number`, `chunk_index`, `content`, `token_count`, `embedding`
-- Optional später: Überschriften als Kontext voranstellen
+| Teilen | Notebook mit anderen teilen | ⚪ Phase 3 |
+| Login | Ein Nutzer, Registrierung aus | ✅ umgesetzt |
+| Dark Mode | Hell, Dunkel oder System | ✅ umgesetzt |
+| Verbrauchsanzeige | Tagesverbrauch von Workers AI in der Kopfzeile | ✅ umgesetzt |
 
 ---
 
-## 3. RAG-Pipeline – Bewertung der Schritte
+## 2. Rahmenbedingungen
 
-| # | Schritt | Bewertung / Ergänzung |
-|---|---|---|
-| 1 | PDF hochladen | Direkt zu Supabase Storage (siehe 2.4). Danach Eintrag in `sources` mit Status `uploaded`. |
-| 2 | Text extrahieren | Seitenweise, damit Zitate Seitenzahlen haben. |
-| 3 | In Chunks aufteilen | Siehe 2.5. |
-| 4 | Embeddings erzeugen | **Batch-Calls** (mehrere Chunks pro Request), Rate Limits beachten, Retry mit Backoff. |
-| 5 | In pgvector speichern | Status der Quelle auf `ready` setzen. Fehler → `failed` + Meldung im UI. |
-| 6 | Ähnliche Chunks suchen | Als Postgres-Funktion (`match_chunks`) via RPC. **Filter auf ausgewählte Quellen** des Notebooks. Top-k ca. 8–15. Hybrid Search ergänzen. |
-| 7 | Kontext an Gemini senden | Chunks nummeriert in den Prompt (`[1] … [2] …`). System-Prompt: nur aus Quellen antworten, sonst sagen „steht nicht in den Quellen“. |
-| 8 | Antwort mit Quellen zurückgeben | Gestreamt. Zitat-Marker `[n]` im Frontend auf Chunk → Quelle + Seite mappen und klickbar machen. |
+Aus [CLAUDE.md](../CLAUDE.md), festgelegt am 2026-11-07:
 
-**Fehlende Schritte:**
-- **0. Quellen-Zusammenfassung** nach der Ingestion (für die Quellen-Übersicht wie in NotebookLM).
-- **Chat-Verlauf** speichern und bei Folgefragen die Frage umformulieren (Query Rewriting), damit „und was sagt er dazu?“ sinnvoll gesucht wird.
-- **Optional: Re-Ranking** der gefundenen Chunks (später, wenn Qualität nicht reicht).
+1. **Open Source:** Jede Bibliothek und jedes Modell hat eine Open-Source-Lizenz.
+2. **Keine Kosten:** Nur Free Tiers ohne hinterlegtes Zahlungsmittel.
+3. **Keine Lizenzverstöße:** Jede Abhängigkeit steht mit Lizenz in [THIRD_PARTY_LICENSES.md](../THIRD_PARTY_LICENSES.md).
+4. **Alles in der Cloud:** Kein Docker, keine lokale Datenbank, keine lokalen Modelle.
+
+Folgen für den ursprünglichen Vorschlag:
+- **Gemini fällt weg,** weil es proprietär ist, auch im Free Tier.
+- **Docker fällt weg,** damit auch der lokale Supabase-Stack.
 
 ---
 
-## 4. Kritischer Punkt: Lange Verarbeitung auf Vercel
+## 3. Stack: Vorschlag und Umsetzung
 
-Ein 300-Seiten-PDF bedeutet hunderte Chunks und viele Embedding-Calls. Das kann länger dauern als eine Function laufen darf (Limits hängen vom Vercel-Plan ab, **beim Start prüfen**).
-
-| Option | Aufwand | Anmerkung |
-|---|---|---|
-| Alles in einer API Route | gering | Reicht für kleine PDFs im MVP. Status-Polling im UI. |
-| `after()` aus Next.js | gering | Antwort sofort zurück, Verarbeitung läuft danach weiter – unterliegt aber trotzdem dem Function-Timeout. |
-| Supabase Edge Function + DB-Trigger | mittel | Bleibt im Supabase-Ökosystem. |
-| Job-Queue (Inngest, Trigger.dev, QStash) | mittel | Robust, Retries, Schritte einzeln. Beste Lösung für große Dateien. |
-
-**Empfehlung:** MVP mit einfacher API Route + Status-Feld, Umstieg auf eine Queue, sobald große PDFs scheitern.
-
----
-
-## 5. Datenmodell (erster Entwurf)
-
-```
-notebooks   (id, user_id, title, created_at)
-sources     (id, notebook_id, type, title, storage_path, status, summary, page_count, created_at)
-chunks      (id, source_id, chunk_index, page_number, content, token_count, embedding vector(768), fts tsvector)
-messages    (id, notebook_id, role, content, citations jsonb, created_at)
-notes       (id, notebook_id, content, created_at)            -- Phase 2
-```
-
----
-
-## 6. Deployment
-
-| Komponente | Bewertung | Anmerkung |
-|---|---|---|
-| Vercel | ✅ passt | Function-Timeouts und Body-Limit beachten (Abschnitte 2.4 und 4). |
-| Supabase Cloud | ✅ passt | Free-Tier pausiert Projekte nach Inaktivität – für Demo okay, für echten Betrieb Pro-Plan. |
-
-**Fehlt noch:**
-- **Env-Variablen:** `GOOGLE_GENERATIVE_AI_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (nur serverseitig!), `GEMINI_CHAT_MODEL`, `GEMINI_EMBEDDING_MODEL`
-- **Supabase Migrations** im Repo (`supabase/migrations`), nicht im Dashboard klicken.
-- **Lokale Entwicklung:** Supabase CLI (`supabase start`, braucht Docker) oder direkt gegen ein Dev-Projekt in der Cloud.
-
----
-
-## 7. Kosten & Limits (zu recherchieren)
-
-- [ ] Gemini Free Tier: Requests/Minute und Tokens/Tag für Chat- und Embedding-Modell
-- [ ] Gemini Paid: Preis pro 1M Input/Output Token, Preis Embeddings
-- [ ] Achtung: Im Free Tier darf Google Daten zur Verbesserung nutzen – für vertrauliche Dokumente Paid Tier
-- [ ] Supabase Free: 500 MB DB, 1 GB Storage – reicht das für Vektoren? (768 Dim × 4 Byte ≈ 3 KB pro Chunk)
-- [ ] Vercel Hobby: Function-Laufzeit, kommerzielle Nutzung nicht erlaubt
-
----
-
-## 8. Offene Entscheidungen (Zusammenfassung)
-
-| # | Frage | Optionen | Entscheidung |
+| Bereich | Ursprünglicher Vorschlag | Umgesetzt | Grund |
 |---|---|---|---|
-| 1 | Zielgruppe | Nur ich · öffentlich mit Login | |
-| 2 | RAG selbst bauen? | Eigene Pipeline · Gemini File Search · Hybrid mit Long Context | |
-| 3 | Chat-Modell | Gemini 2.5 Flash · neueres Flash-Modell | |
-| 4 | Embedding-Dimension | 768 · 1536 | |
-| 5 | PDF-Parser | unpdf/pdfjs-dist · pdf-parse · Gemini | |
-| 6 | Hintergrund-Jobs | API Route · Edge Function · Queue | |
-| 7 | MVP-Scope | Nur Chat mit Zitaten · + Zusammenfassungen · + Studio | |
-| 8 | Quellentypen im MVP | Nur PDF · PDF + Text · + URL | |
+| Framework | Next.js 15 | **Next.js 16.4** (App Router, Cache Components, Proxy) | aktuelle Version beim Start |
+| UI | Tailwind CSS, shadcn/ui | **Tailwind v4, shadcn/ui** (Base UI), next-themes für den Dark Mode | wie geplant |
+| Backend | Next.js API Routes | **Route Handler und Server Actions**, `src/proxy.ts` für Session und Login-Weiterleitung | kein separates Backend nötig |
+| Chat-Modell | Gemini 2.5 Flash | **gpt-oss-20b** über Cloudflare Workers AI (Apache-2.0), Ausweichmodell Mistral Small 3.1 | Gemini proprietär, gpt-oss im Test am schnellsten und günstigsten |
+| Embeddings | Gemini Embeddings | **bge-m3** über Workers AI (MIT, 1024 Dimensionen, mehrsprachig) | offen, gut für Deutsch |
+| KI-Anbindung | AI SDK mit `@ai-sdk/google` | **AI SDK v7** mit `@ai-sdk/openai-compatible` | OpenAI-kompatibler Endpunkt von Workers AI |
+| Datenbank | Supabase PostgreSQL + pgvector | **Supabase Free** in Frankfurt, pgvector 0.8.2, HNSW-Index, RLS auf allen Tabellen | wie geplant |
+| Dateien | Supabase Storage | **privater Bucket** `sources`, Upload direkt aus dem Browser über signierte URLs | Vercel nimmt nur ca. 4,5 MB pro Anfrage an |
+| PDF | pdf-parse oder pdfjs-dist | **unpdf** (pdf.js), Text seitenweise | Seitenzahlen für Zitate |
+| Hosting | Vercel | **Vercel Hobby**, Region Frankfurt (fra1) | nahe an der Datenbank |
+| Tests | – | **Vitest:** Unit-Tests und Integrationstests gegen Supabase, vor jedem Deployment | neu dazugekommen |
 
 ---
 
-## 9. Vorschlag MVP (Phase 1)
+## 4. Entscheidungen
 
-1. Next.js-Projekt mit Tailwind + shadcn/ui aufsetzen, 3-Spalten-Layout
-2. Supabase: Tabellen, pgvector, RLS, Storage-Bucket, Auth
-3. Upload direkt zu Storage → Ingestion-Route (extrahieren, chunken, embedden, speichern)
-4. Quellenliste mit Status und Checkboxen
-5. Chat mit Streaming (AI SDK), Retrieval über ausgewählte Quellen, Zitate `[n]`
-6. Klick auf Zitat öffnet PDF an der richtigen Seite
-7. Deployment Vercel + Supabase Cloud
+Die offenen Fragen aus der ersten Evaluation und wie sie entschieden wurden:
 
-**Phase 2:** Notizen, Quellen-Zusammenfassungen, Study Guide / FAQ / Briefing, Hybrid Search
-**Phase 3:** Audio Overview (Gemini TTS mit zwei Stimmen), Teilen, weitere Quellentypen
+| # | Frage | Entscheidung |
+|---|---|---|
+| 1 | Zielgruppe | Privat, ein Nutzer. Trotzdem mit Login, weil die App öffentlich erreichbar ist. Registrierung ist aus. |
+| 2 | RAG selbst bauen? | Ja, eigene Pipeline. Die Gemini File Search API ist proprietär. |
+| 3 | Chat-Modell | gpt-oss-20b, nach einem Test von fünf Modellen. qwen3-30b schied aus, weil Cloudflare es am 20.11.2026 abschaltet. |
+| 4 | Embedding-Dimension | 1024 (bge-m3), unter dem HNSW-Limit von 2.000 |
+| 5 | PDF-Parser | unpdf. Gescannte PDFs werden erkannt und mit Hinweis abgelehnt, OCR gibt es nicht. |
+| 6 | Hintergrund-Jobs | Eine Anfrage pro Quelle (max. 60 s, max. 300 Seiten). Die Zusammenfassung läuft danach per `after()`. Eine Job-Queue war bisher nicht nötig. |
+| 7 | Umfang | MVP und Phase 2 komplett |
+| 8 | Quellentypen | PDF und Text. Notizen lassen sich als Text-Quelle hinzufügen. |
+
+Die Entscheidungen zu Phase 2 (Zusammenfassung automatisch, Auswahl bis 12.000 Token, eine Tabelle für Notizen und Studio, Volltext mit `simple`) stehen in [MVP_USER_STORIES.md](MVP_USER_STORIES.md).
+
+---
+
+## 5. RAG-Pipeline, wie sie umgesetzt ist
+
+**Quelle einlesen**
+
+| # | Schritt | Umsetzung |
+|---|---|---|
+| 1 | Upload | Der Browser lädt direkt in den Storage, über eine signierte URL, max. 50 MB. Die Quelle bekommt den Status `uploaded`. |
+| 2 | Text extrahieren | unpdf liest seitenweise. Silbentrennung und Steuerzeichen werden bereinigt. Unter 20 Zeichen pro Seite gilt das PDF als Scan. Text-Quellen bilden einen Block ohne Seitenzahl. |
+| 3 | Chunks | ca. 3.200 Zeichen (ca. 800 Token), 400 Zeichen Überlappung. Geschnitten wird an Absatz-, Satz- und Wortgrenzen, nie über eine Seitengrenze. |
+| 4 | Embeddings | bge-m3 in Batches zu 32 Texten |
+| 5 | Speichern | Tabelle `chunks` mit Vektor (HNSW-Index) und Volltextspalte (`tsvector`, GIN-Index). Status `ready`, bei Fehlern `failed` mit verständlichem Grund. |
+| 6 | Zusammenfassung | Bei großen Quellen eine Auswahl aus Anfang, Ende und verteilten Abschnitten, bis 12.000 Token. Ergebnis: 4 bis 6 Sätze und Schlüsselthemen. |
+
+**Frage beantworten**
+
+| # | Schritt | Umsetzung |
+|---|---|---|
+| 1 | Folgefrage umformulieren | Mit den letzten 6 Nachrichten wird die Frage eigenständig gemacht, z. B. „Und warum?“ zu „Warum stieg der Umsatz 2025?“. |
+| 2 | Hybrid-Suche | Postgres-Funktion `match_chunks_hybrid`: Vektorsuche plus Volltextsuche. Füllwörter entfernt die App vorher. Beide Rankings werden per Reciprocal Rank Fusion (k = 60) zusammengeführt, die besten 8 Abschnitte kommen in den Prompt. Gesucht wird nur in den ausgewählten, fertigen Quellen des Notebooks. |
+| 3 | Prompt | Nummerierte Abschnitte mit Titel und Seite, dazu der Verlauf ohne alte Zitat-Marker. Steht nichts in den Quellen, gibt es eine feste Antwort. |
+| 4 | Antwort | Gestreamt als NDJSON: erst die Zitate, dann der Text. |
+| 5 | Anzeige | Zitat-Marker werden zu Chips. Ein Klick öffnet das PDF im Browser-Viewer auf der Seite (`#page=n`), daneben steht der zitierte Abschnitt. |
+| 6 | Verlauf | Frage und Antwort samt Zitaten landen in `messages`. |
+
+Re-Ranking der Treffer war bisher nicht nötig.
+
+---
+
+## 6. Datenmodell
+
+```
+notebooks   (id, user_id, title, created_at, updated_at)
+sources     (id, notebook_id, user_id, type pdf|text, title, storage_path, status, error, page_count,
+             summary, key_topics, summary_status, created_at, updated_at)
+chunks      (id, source_id, user_id, chunk_index, page_number, content, token_count,
+             embedding vector(1024), fts tsvector, created_at)
+messages    (id, notebook_id, user_id, role, content, citations jsonb, created_at)
+notes       (id, notebook_id, user_id, kind note|faq|briefing|study_guide|timeline, title, content,
+             citations jsonb, source_ids, created_at, updated_at)
+usage_log   (id, user_id, kind, neurons, estimated, created_at)
+```
+
+- **Funktionen:** `match_chunks`, `match_chunks_hybrid`, `usage_today`
+- **Schutz:** Row Level Security auf allen Tabellen, ausdrückliche `GRANT`s, anonyme Nutzer haben keinen Zugriff. Die Sicherheitsprüfung von Supabase meldet keine Warnung zum Code.
+- **Migrationen:** in [supabase/migrations](../supabase/migrations), eingespielt mit der Supabase CLI ohne Docker
+
+---
+
+## 7. Lange Verarbeitung auf Vercel
+
+Die Sorge aus der ersten Evaluation war, dass große PDFs die Laufzeit einer Vercel Function sprengen. Umgesetzt ist die einfachste Variante:
+
+- **Eine Anfrage pro Quelle:** max. 60 Sekunden und max. 300 Seiten.
+- **Status-Abfrage:** Die Oberfläche fragt alle 2 Sekunden nach, bis die Quelle fertig ist.
+- **Zusammenfassung:** läuft per `after()`, nachdem die Antwort schon zurück ist.
+
+Das OWASP-PDF mit 122 Seiten wurde damit problemlos verarbeitet. Eine Job-Queue (Inngest, QStash) wäre erst nötig, wenn größere Dokumente scheitern.
+
+---
+
+## 8. Kosten und Limits
+
+Alle Dienste laufen im Free Tier ohne Zahlungsmittel. Begrenzend ist das Kontingent von Workers AI: **10.000 Neurons pro Tag**, zurückgesetzt um 0:00 UTC.
+
+| Vorgang | Neurons | Messung |
+|---|---|---|
+| Chat-Frage (ca. 7.000 Token Input) | 127 | gemessen |
+| Zusammenfassung (Auswahl bis 12.000 Token) | 220 | gemessen |
+| Studio-Ausgabe, kleine Quelle | 21 | gemessen |
+| Studio-Ausgabe, große Quelle | ca. 150–200 | hochgerechnet |
+| Embeddings für 100 Seiten | ca. 50 | geschätzt, Workers AI meldet hier keinen Verbrauch |
+| Embeddings OWASP-PDF (122 Seiten, ca. 57.000 Token) | ca. 60 | geschätzt |
+
+Weitere Grenzen:
+
+| Dienst | Grenze |
+|---|---|
+| Supabase Free | 500 MB Datenbank, 1 GB Storage, 50 MB pro Datei, pausiert nach ca. 1 Woche ohne Nutzung |
+| Vektoren | 1024 × 4 Byte ≈ 4 KB pro Chunk, plus Index und Text. Grob einige zehntausend Chunks passen in die 500 MB. |
+| Vercel Hobby | nur nicht kommerziell, ca. 4,5 MB pro Anfrage, eine Function-Region |
+
+**Datenschutz:** Bei jeder Frage gehen die passenden Textabschnitte an Cloudflare. Die Datenbank liegt in Frankfurt.
+
+---
+
+## 9. Qualität und Tests
+
+- **123 Unit-Tests:** Chunking, PDF-Extraktion, Zitate, Prompts, Validierung, Verbrauch.
+- **71 Integrationstests gegen die echte Supabase-Datenbank:** RLS zwischen zwei Nutzern, Notebooks, Quellen, Pipeline, Chat, Verlauf, Zusammenfassung, Hybrid-Suche, Studio, Notizen und Verbrauch. Sie arbeiten mit temporären Test-Nutzern und Fake-Embeddings, kosten also keine Neurons.
+- **11 Tests mit dem echten Modell,** nur auf Wunsch (`RUN_AI_TESTS=1`): Antwortqualität, 5 unbeantwortbare Fragen, Folgefrage, Zusammenfassung und FAQ.
+- **Pipeline:** `vercel.json` führt vor jedem Build `npm run verify` aus (Lint, Typecheck, Unit- und Integrationstests). Schlägt ein Test fehl, wird nicht deployt.
+- **Gegenprobe:** 7 absichtlich eingebaute Fehler wurden alle von den Tests erkannt.
+
+---
+
+## 10. Offene Punkte
+
+**Phase 3 (nicht geplant, nur gesammelt)**
+- **Audio Overview** mit offenem Text-to-Speech (z. B. Kokoro, Piper). Die Lizenzen der Stimmen müssen einzeln geprüft werden.
+- **Teilen** mit anderen Nutzern
+- **Weitere Quellen:** URLs und Texterkennung (OCR) für gescannte PDFs
+- **Mind Map**
+- **Browser-Tests** mit Playwright. Playwright lädt einen eigenen Browser herunter, das muss freigegeben werden.
+- **Re-Ranking** der Suchtreffer, falls die Antwortqualität nicht reicht
+
+**Wartung**
+- **Cloudflare-Token** läuft am **07.11.2027** ab. Dann einen neuen in `.env.local` und in Vercel eintragen.
+- **Abschaltung von Modellen:** Cloudflare kündigt sie an (`planned_deprecation_date`). Trifft es gpt-oss-20b, `CHAT_MODEL` auf `@cf/mistralai/mistral-small-3.1-24b-instruct` umstellen.
+- **Supabase-Pause:** Pausiert das Projekt nach einer Woche ohne Nutzung, lässt es sich im Dashboard wieder starten.
+- **Preview-Deployments:** Die Env-Variablen sind nur für Production gesetzt. Für Arbeit auf anderen Branches in Vercel ergänzen.
