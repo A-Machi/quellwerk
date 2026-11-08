@@ -242,7 +242,7 @@ Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen
 
 # Phase 2 – Studio, Notizen und bessere Suche
 
-Entschieden am 2026-11-07: Phase 2 wird komplett umgesetzt, bei offenen Fragen gilt jeweils die Empfehlung.
+Entschieden am 2026-11-07: Phase 2 wird komplett umgesetzt.
 
 ## Phase 2 · Ziel
 
@@ -408,12 +408,12 @@ Wie im MVP, zusätzlich:
 
 ## Phase 2 · Entscheidungen
 
-| # | Frage | Optionen | Empfehlung | Entscheidung |
-|---|---|---|---|---|
-| 1 | Wann wird die Zusammenfassung erzeugt? | automatisch nach der Verarbeitung · erst beim ersten Aufklappen | automatisch, dann ist sie sofort da | ✅ automatisch |
-| 2 | Wie viel Text geht in die Zusammenfassung? | ganzes Dokument · Auswahl bis 12.000 Token | Auswahl, nach Messung in V-07 bestätigen | ✅ Auswahl bis 12.000 Token |
-| 3 | Notizen und Studio-Ausgaben speichern | eine Tabelle `notes` mit `kind` · zwei Tabellen | eine Tabelle, einfacher | ✅ eine Tabelle `notes` |
-| 4 | Welche Studio-Ausgaben zuerst? | Study Guide · FAQ · Briefing · Zeitleiste | FAQ und Briefing zuerst, Zeitleiste zuletzt | ✅ alle vier, Reihenfolge FAQ, Briefing, Study Guide, Zeitleiste |
-| 5 | Sprache der Volltextsuche | `german` (Wortstämme) · `simple` (exakte Wörter) | `simple`, weil viele Quellen englisch oder gemischt sind | ✅ `simple`, Stoppwörter filtert die App |
-| 6 | Verbrauchsanzeige (US-21) | ja · nein | ja | ✅ ja |
-| 7 | Reihenfolge der Sprints | wie in Teil C · andere | wie in Teil C | ✅ wie in Teil C |
+| # | Frage | Optionen | Entscheidung |
+|---|---|---|---|
+| 1 | Wann wird die Zusammenfassung erzeugt? | automatisch nach der Verarbeitung · erst beim ersten Aufklappen | ✅ automatisch |
+| 2 | Wie viel Text geht in die Zusammenfassung? | ganzes Dokument · Auswahl bis 12.000 Token | ✅ Auswahl bis 12.000 Token |
+| 3 | Notizen und Studio-Ausgaben speichern | eine Tabelle `notes` mit `kind` · zwei Tabellen | ✅ eine Tabelle `notes` |
+| 4 | Welche Studio-Ausgaben zuerst? | Study Guide · FAQ · Briefing · Zeitleiste | ✅ alle vier, Reihenfolge FAQ, Briefing, Study Guide, Zeitleiste |
+| 5 | Sprache der Volltextsuche | `german` (Wortstämme) · `simple` (exakte Wörter) | ✅ `simple`, Stoppwörter filtert die App |
+| 6 | Verbrauchsanzeige (US-21) | ja · nein | ✅ ja |
+| 7 | Reihenfolge der Sprints | wie in Teil C · andere | ✅ wie in Teil C |
