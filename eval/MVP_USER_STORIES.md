@@ -1,8 +1,8 @@
 # User Stories und Voraussetzungen
 
-Teil 1: MVP (Sprint 0 bis 4) · Teil 2: [Phase 2](#phase-2--studio-notizen-und-bessere-suche) (Sprint 5 bis 8)
+Teil 1: MVP (Sprint 0 bis 4) - Teil 2: [Phase 2](#phase-2--studio-notizen-und-bessere-suche) (Sprint 5 bis 8)
 
-Stand: 2026-11-07 · Grundlage: [CLAUDE.md](../CLAUDE.md) (Open Source, keine Kosten, keine Lizenzverstöße, alles in der Cloud)
+Stand: 2026-11-07 - Grundlage: [CLAUDE.md](../CLAUDE.md) (Open Source, keine Kosten, keine Lizenzverstöße, alles in der Cloud)
 
 ## Annahmen für das MVP
 
@@ -61,8 +61,8 @@ Der Name „NotebookLM“ ist eine Marke von Google und darf nicht verwendet wer
 - [x] shadcn/ui initialisiert (Base UI, Komponenten in `src/frontend/components/ui`)
 - [x] Supabase-Client für Browser und Server (`@supabase/ssr`)
 - [x] AI SDK (`ai` + `@ai-sdk/openai-compatible`) gegen Workers AI angebunden (Test mit echtem Token folgt in V-04)
-- [x] Leeres 3-Spalten-Layout: Quellen · Chat · (Platzhalter Studio)
-- [x] Ordnerstruktur `src/app` · `src/frontend` · `src/backend`, Backend mit `server-only` geschützt
+- [x] Leeres 3-Spalten-Layout: Quellen - Chat - (Platzhalter Studio)
+- [x] Ordnerstruktur `src/app` - `src/frontend` - `src/backend`, Backend mit `server-only` geschützt
 - [x] Repo in Vercel importiert (Team A-Team, Hobby), erstes Deployment erreichbar
 - [x] Env-Variablen in Vercel gesetzt (alle 7 für Production, die zwei Secrets als „Secret“; Preview folgt bei Bedarf), Function Region Frankfurt (fra1), Redeploy erfolgreich
 
@@ -76,11 +76,11 @@ Der Name „NotebookLM“ ist eine Marke von Google und darf nicht verwendet wer
 
 ## Teil B – User Stories
 
-Format: *Als Nutzer möchte ich …, damit …* · Größe: S (< 1 Tag), M (1–2 Tage), L (3+ Tage) · Priorität nach MoSCoW
+Format: *Als Nutzer möchte ich …, damit …* - Größe: S (< 1 Tag), M (1–2 Tage), L (3+ Tage) - Priorität nach MoSCoW
 
 ### Epic 0 – Zugang
 
-#### US-00 – Einloggen · S · Must
+#### US-00 – Einloggen - S - Must
 Als Nutzer möchte ich mich einloggen, damit niemand anderes meine Notebooks sieht oder meine Free-Tier-Kontingente verbraucht.
 - [x] Login-Seite mit E-Mail und Passwort (Supabase Auth)
 - [x] Alle anderen Seiten und API Routes sind ohne Login gesperrt
@@ -90,7 +90,7 @@ Als Nutzer möchte ich mich einloggen, damit niemand anderes meine Notebooks sie
 
 ### Epic 1 – Notebooks
 
-#### US-01 – Notebook anlegen · S · Must
+#### US-01 – Notebook anlegen - S - Must
 Als Nutzer möchte ich ein neues Notebook mit einem Titel anlegen, damit ich Quellen zu einem Thema bündeln kann.
 - [x] Button „Neues Notebook“ auf der Startseite
 - [x] Titel ist editierbar, Standard „Unbenanntes Notebook“
@@ -98,7 +98,7 @@ Als Nutzer möchte ich ein neues Notebook mit einem Titel anlegen, damit ich Que
 
 *Braucht:* US-00
 
-#### US-02 – Notebooks verwalten · S · Must
+#### US-02 – Notebooks verwalten - S - Must
 Als Nutzer möchte ich alle Notebooks sehen, öffnen, umbenennen und löschen, damit ich den Überblick behalte.
 - [x] Startseite zeigt alle Notebooks mit Titel, Anzahl Quellen, Datum
 - [x] Löschen fragt nach Bestätigung und entfernt Quellen, Chunks, Dateien und Chatverlauf mit
@@ -107,7 +107,7 @@ Als Nutzer möchte ich alle Notebooks sehen, öffnen, umbenennen und löschen, d
 
 ### Epic 2 – Quellen
 
-#### US-03 – PDF hochladen · M · Must
+#### US-03 – PDF hochladen - M - Must
 Als Nutzer möchte ich ein oder mehrere PDFs in ein Notebook hochladen, damit ich Fragen dazu stellen kann.
 - [x] Upload per Button und Drag & Drop
 - [x] Nur PDF erlaubt, max. 50 MB pro Datei (Limit von Supabase Free)
@@ -116,7 +116,7 @@ Als Nutzer möchte ich ein oder mehrere PDFs in ein Notebook hochladen, damit ic
 
 *Braucht:* US-01, V-03
 
-#### US-04 – PDF wird verarbeitet · L · Must
+#### US-04 – PDF wird verarbeitet - L - Must
 Als Nutzer möchte ich, dass das PDF nach dem Upload automatisch durchsuchbar gemacht wird, damit der Chat es verwenden kann.
 - [x] API Route auf Vercel lädt das PDF aus dem Storage und extrahiert den Text **seitenweise** (unpdf oder pdfjs-dist)
 - [x] Text wird in Chunks geteilt (ca. 800 Token, ca. 100 Token Overlap, an Absatzgrenzen)
@@ -128,20 +128,20 @@ Als Nutzer möchte ich, dass das PDF nach dem Upload automatisch durchsuchbar ge
 
 *Braucht:* US-03, V-04
 
-#### US-05 – Verarbeitungsstatus sehen · S · Must
+#### US-05 – Verarbeitungsstatus sehen - S - Must
 Als Nutzer möchte ich sehen, ob eine Quelle noch verarbeitet wird oder fertig ist, damit ich weiß, wann ich fragen kann.
 - [x] Quellenliste zeigt Status (Spinner, Haken, Fehler-Icon mit Grund)
 - [x] Status aktualisiert sich ohne Neuladen der Seite
 
 *Braucht:* US-04
 
-#### US-06 – Quellen verwalten · S · Must
+#### US-06 – Quellen verwalten - S - Must
 Als Nutzer möchte ich Quellen umbenennen und löschen, damit falsche Uploads den Chat nicht stören.
 - [x] Löschen entfernt Datei im Storage und alle zugehörigen Chunks
 
 *Braucht:* US-03
 
-#### US-07 – Quellen für den Chat auswählen · S · Must
+#### US-07 – Quellen für den Chat auswählen - S - Must
 Als Nutzer möchte ich per Checkbox wählen, welche Quellen der Chat nutzt, damit ich Antworten auf bestimmte Dokumente eingrenzen kann.
 - [x] Checkbox pro Quelle, „Alle auswählen“
 - [x] Nur Quellen mit Status `ready` sind auswählbar
@@ -149,7 +149,7 @@ Als Nutzer möchte ich per Checkbox wählen, welche Quellen der Chat nutzt, dami
 
 *Braucht:* US-05
 
-#### US-08 – Text als Quelle einfügen · S · Should
+#### US-08 – Text als Quelle einfügen - S - Should
 Als Nutzer möchte ich kopierten Text als Quelle einfügen, damit ich auch Inhalte ohne PDF nutzen kann.
 - [x] Dialog mit Titel und Textfeld, danach gleiche Verarbeitung wie US-04 (ohne Seitenzahlen)
 
@@ -157,7 +157,7 @@ Als Nutzer möchte ich kopierten Text als Quelle einfügen, damit ich auch Inhal
 
 ### Epic 3 – Chat
 
-#### US-09 – Frage stellen und Antwort erhalten · L · Must
+#### US-09 – Frage stellen und Antwort erhalten - L - Must
 Als Nutzer möchte ich eine Frage zu meinen Quellen stellen und eine Antwort bekommen, die nur auf diesen Quellen beruht.
 - [x] Frage wird mit bge-m3 eingebettet, `match_chunks` liefert Top-k Chunks (ca. 8–10) aus den ausgewählten Quellen
 - [x] Chunks nummeriert in den Prompt, System-Prompt verlangt Antworten nur aus den Quellen
@@ -168,14 +168,14 @@ Als Nutzer möchte ich eine Frage zu meinen Quellen stellen und eine Antwort bek
 
 *Braucht:* US-04, US-07
 
-#### US-10 – Ehrliche Antwort, wenn nichts gefunden · S · Must
+#### US-10 – Ehrliche Antwort, wenn nichts gefunden - S - Must
 Als Nutzer möchte ich klar erfahren, wenn die Quellen meine Frage nicht beantworten, damit ich keiner erfundenen Antwort vertraue.
 - [x] Antwort lautet sinngemäß „Dazu steht nichts in den ausgewählten Quellen“
 - [x] Mit 5 Testfragen geprüft, deren Antwort nicht in den Quellen steht
 
 *Braucht:* US-09
 
-#### US-11 – Chatverlauf bleibt erhalten · M · Must
+#### US-11 – Chatverlauf bleibt erhalten - M - Must
 Als Nutzer möchte ich nach dem Neuladen meinen bisherigen Chat sehen und Folgefragen stellen können.
 - [x] Nachrichten inkl. Zitaten werden in `messages` gespeichert
 - [x] Folgefragen („Und was steht zu Punkt 2?“) werden vor der Suche mit dem Verlauf zu einer eigenständigen Frage umformuliert
@@ -185,7 +185,7 @@ Als Nutzer möchte ich nach dem Neuladen meinen bisherigen Chat sehen und Folgef
 
 ### Epic 4 – Quellenangaben
 
-#### US-12 – Zitate in der Antwort · M · Must
+#### US-12 – Zitate in der Antwort - M - Must
 Als Nutzer möchte ich zu jeder Aussage sehen, aus welcher Quelle sie stammt, damit ich sie prüfen kann.
 - [x] Antwort enthält Marker `[1]`, `[2]` …
 - [x] Marker werden als klickbare Chips angezeigt, Hover zeigt Quellname, Seite und Textausschnitt
@@ -193,7 +193,7 @@ Als Nutzer möchte ich zu jeder Aussage sehen, aus welcher Quelle sie stammt, da
 
 *Braucht:* US-09
 
-#### US-13 – Zur zitierten Stelle springen · M · Must
+#### US-13 – Zur zitierten Stelle springen - M - Must
 Als Nutzer möchte ich auf ein Zitat klicken und die Stelle im PDF sehen, damit ich den Kontext lesen kann.
 - [x] Klick öffnet einen PDF-Viewer (react-pdf) auf der richtigen Seite, PDF wird über eine kurzlebige Signed URL aus dem Storage geladen
 - [x] Zitierter Textausschnitt ist sichtbar hervorgehoben (Should, Seite reicht für Must)
@@ -233,10 +233,10 @@ Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen
 | # | Frage | Optionen | Entscheidung |
 |---|---|---|---|
 | 1 | Projektname | – | ✅ Quellwerk |
-| 2 | Chat-Modell | gpt-oss-20b · Mistral Small 3.1 · weitere | ✅ gpt-oss-20b |
-| 3 | Text-Quellen im MVP | Ja (US-08) · später | ✅ Ja |
-| 4 | Eigene Projekt-Lizenz | MIT · Apache-2.0 | ✅ MIT |
-| 5 | Supabase-Region | Frankfurt · andere EU-Region | ✅ Frankfurt |
+| 2 | Chat-Modell | gpt-oss-20b - Mistral Small 3.1 - weitere | ✅ gpt-oss-20b |
+| 3 | Text-Quellen im MVP | Ja (US-08) - später | ✅ Ja |
+| 4 | Eigene Projekt-Lizenz | MIT - Apache-2.0 | ✅ MIT |
+| 5 | Supabase-Region | Frankfurt - andere EU-Region | ✅ Frankfurt |
 
 ---
 
@@ -244,12 +244,12 @@ Nach Sprint 3 ist der Kern nutzbar: PDF hoch, Frage stellen, Antwort mit Quellen
 
 Entschieden am 2026-11-07: Phase 2 wird komplett umgesetzt.
 
-## Phase 2 · Ziel
+## Phase 2 - Ziel
 
 Phase 2 füllt die Studio-Spalte und macht Quellen schneller verständlich:
 Zusammenfassungen pro Quelle, Studio-Ausgaben (Study Guide, FAQ, Briefing, Zeitleiste), Notizen und eine bessere Suche.
 
-## Phase 2 · Das Free-Tier-Limit als wichtigste Randbedingung
+## Phase 2 - Das Free-Tier-Limit als wichtigste Randbedingung
 
 Workers AI erlaubt **10.000 Neurons pro Tag**. Im MVP kostet eine Chat-Frage etwa 130 Neurons, weil nur 8 Abschnitte ans Modell gehen. Studio-Funktionen lesen deutlich mehr Text. Deshalb gilt für Phase 2:
 
@@ -273,7 +273,7 @@ Die Werte werden in V-07 gemessen und hier ersetzt.
 
 ---
 
-## Phase 2 · Teil A – Was vorher stehen muss
+## Phase 2 - Teil A – Was vorher stehen muss
 
 ### V-07 – Verbrauch messen
 - [x] Zusammenfassung mit Auswahl (12.000 Token) gemessen: 220 Neurons (synthetisches 40-Seiten-Dokument). Das ganze Dokument wurde nicht gemessen, um das Kontingent zu schonen: Der Verbrauch ist linear zu den Token (bestätigt durch die Chat-Messung), also ca. 1.000 Neurons für 57.000 Token.
@@ -282,10 +282,10 @@ Die Werte werden in V-07 gemessen und hier ersetzt.
 - [x] Tabelle „Kosten-Schätzung“ oben mit den gemessenen Werten aktualisiert
 
 ### V-08 – Datenbank erweitern (Migration)
-- [x] `sources`: Spalten `summary text`, `key_topics text[]`, `summary_status` (`none` · `pending` · `ready` · `failed`)
+- [x] `sources`: Spalten `summary text`, `key_topics text[]`, `summary_status` (`none` - `pending` - `ready` - `failed`)
 - [x] Neue Tabelle `notes`: Notizen und Studio-Ausgaben in einer Tabelle (siehe Entscheidung 3)
-  - `id`, `notebook_id`, `user_id`, `kind` (`note` · `study_guide` · `faq` · `briefing` · `timeline`), `title`, `content` (Markdown), `citations jsonb`, `source_ids uuid[]`, `created_at`, `updated_at`
-- [x] Neue Tabelle `usage_log`: `id`, `user_id`, `kind` (`chat` · `rewrite` · `embedding` · `summary` · `studio`), `neurons numeric`, `created_at`
+  - `id`, `notebook_id`, `user_id`, `kind` (`note` - `study_guide` - `faq` - `briefing` - `timeline`), `title`, `content` (Markdown), `citations jsonb`, `source_ids uuid[]`, `created_at`, `updated_at`
+- [x] Neue Tabelle `usage_log`: `id`, `user_id`, `kind` (`chat` - `rewrite` - `embedding` - `summary` - `studio`), `neurons numeric`, `created_at`
 - [x] Für Hybrid-Suche (US-20): Spalte `chunks.fts tsvector` (generiert) mit GIN-Index
 - [x] RLS, Policies und GRANTs wie bei den bestehenden Tabellen
 - [x] Supabase-Advisor: 0 Sicherheitswarnungen
@@ -296,13 +296,13 @@ Die Werte werden in V-07 gemessen und hier ersetzt.
 
 ---
 
-## Phase 2 · Teil B – User Stories
+## Phase 2 - Teil B – User Stories
 
-Format wie im MVP: *Als Nutzer möchte ich …, damit …* · Größe: S (< 1 Tag), M (1–2 Tage), L (3+ Tage) · Priorität nach MoSCoW
+Format wie im MVP: *Als Nutzer möchte ich …, damit …* - Größe: S (< 1 Tag), M (1–2 Tage), L (3+ Tage) - Priorität nach MoSCoW
 
 ### Epic 5 – Quellen verstehen
 
-#### US-14 – Zusammenfassung pro Quelle · M · Must
+#### US-14 – Zusammenfassung pro Quelle - M - Must
 Als Nutzer möchte ich zu jeder Quelle eine kurze Zusammenfassung und die Schlüsselthemen sehen, damit ich schnell weiß, worum es geht, ohne das Dokument zu lesen.
 - [x] Nach erfolgreicher Verarbeitung wird die Zusammenfassung automatisch erzeugt (siehe Entscheidung 1)
 - [x] 4–6 Sätze plus 3–6 Schlüsselthemen, auf Deutsch (wie die Oberfläche)
@@ -312,11 +312,11 @@ Als Nutzer möchte ich zu jeder Quelle eine kurze Zusammenfassung und die Schlü
 - [x] Klick auf ein Schlüsselthema stellt im Chat die Frage „Was steht zu ‚Thema‘ in den Quellen?“
 - [x] Tageslimit erreicht: Quelle bleibt nutzbar, Zusammenfassung zeigt „später erneut versuchen“
 
-*Braucht:* V-07, V-08 · *Kosten:* ca. 240 Neurons pro Quelle, einmalig
+*Braucht:* V-07, V-08 - *Kosten:* ca. 240 Neurons pro Quelle, einmalig
 
 ### Epic 6 – Studio
 
-#### US-15 – Studio-Ausgabe erzeugen · L · Must
+#### US-15 – Studio-Ausgabe erzeugen - L - Must
 Als Nutzer möchte ich aus den ausgewählten Quellen per Klick einen Study Guide, ein FAQ, ein Briefing oder eine Zeitleiste erzeugen, damit ich den Inhalt in einer passenden Form lernen oder weitergeben kann.
 - [x] Studio-Spalte zeigt vier Kacheln: Study Guide, FAQ, Briefing, Zeitleiste
 - [x] Nutzt die im Chat ausgewählten Quellen (US-07)
@@ -326,9 +326,9 @@ Als Nutzer möchte ich aus den ausgewählten Quellen per Klick einen Study Guide
 - [x] Vor dem Erzeugen wird der geschätzte Verbrauch angezeigt („ca. 200 Neurons“)
 - [x] Zeitleiste: nur Ereignisse mit Datum aus den Quellen, sonst Hinweis „Keine datierten Ereignisse gefunden“
 
-*Braucht:* US-14, V-08 · *Kosten:* ca. 205 Neurons pro Ausgabe
+*Braucht:* US-14, V-08 - *Kosten:* ca. 205 Neurons pro Ausgabe
 
-#### US-16 – Studio-Ausgaben verwalten · S · Must
+#### US-16 – Studio-Ausgaben verwalten - S - Must
 Als Nutzer möchte ich erzeugte Ausgaben wieder öffnen, löschen und kopieren, damit ich sie nicht neu erzeugen muss.
 - [x] Liste der Ausgaben unter den Kacheln mit Typ, Titel und Datum
 - [x] Öffnen in einer größeren Ansicht, Löschen mit Bestätigung
@@ -339,7 +339,7 @@ Als Nutzer möchte ich erzeugte Ausgaben wieder öffnen, löschen und kopieren, 
 
 ### Epic 7 – Notizen
 
-#### US-17 – Chat-Antwort als Notiz speichern · S · Must
+#### US-17 – Chat-Antwort als Notiz speichern - S - Must
 Als Nutzer möchte ich eine gute Antwort aus dem Chat als Notiz behalten, damit sie nicht verloren geht, wenn ich den Chat leere.
 - [x] Button „Als Notiz speichern“ unter jeder Antwort
 - [x] Notiz behält Text und Quellenangaben, Titel aus der Frage
@@ -347,7 +347,7 @@ Als Nutzer möchte ich eine gute Antwort aus dem Chat als Notiz behalten, damit 
 
 *Braucht:* V-08
 
-#### US-18 – Eigene Notizen schreiben · M · Should
+#### US-18 – Eigene Notizen schreiben - M - Should
 Als Nutzer möchte ich eigene Notizen anlegen, bearbeiten und löschen, damit ich Gedanken direkt neben den Quellen festhalten kann.
 - [x] Neue Notiz mit Titel und Markdown-Text, Vorschau beim Lesen
 - [x] Bearbeiten und Löschen mit Bestätigung
@@ -355,25 +355,25 @@ Als Nutzer möchte ich eigene Notizen anlegen, bearbeiten und löschen, damit ic
 
 *Braucht:* V-08
 
-#### US-19 – Notiz als Quelle verwenden · S · Could
+#### US-19 – Notiz als Quelle verwenden - S - Could
 Als Nutzer möchte ich eine Notiz in eine Quelle umwandeln, damit der Chat sie bei Antworten berücksichtigt.
 - [x] Button „Als Quelle hinzufügen“ an einer Notiz
 - [x] Wird wie eine Text-Quelle (US-08) verarbeitet
 
-*Braucht:* US-18, US-08 · *Kosten:* Embeddings, vernachlässigbar
+*Braucht:* US-18, US-08 - *Kosten:* Embeddings, vernachlässigbar
 
 ### Epic 8 – Suche und Verbrauch
 
-#### US-20 – Hybrid-Suche · M · Should
+#### US-20 – Hybrid-Suche - M - Should
 Als Nutzer möchte ich, dass der Chat auch exakte Begriffe wie Namen, Nummern oder Abkürzungen zuverlässig findet, damit Fragen wie „Was steht zu LLM05?“ funktionieren.
 - [x] Suche kombiniert Vektorsuche (bge-m3) und Volltextsuche (Postgres `tsvector`)
 - [x] Ergebnisse werden per Reciprocal Rank Fusion zusammengeführt
 - [x] Testfragen mit exakten Begriffen aus dem OWASP-PDF (z. B. „LLM05“, „Improper Output Handling“) finden den richtigen Abschnitt unter den Top 3
 - [x] Keine zusätzlichen Neurons (Volltextsuche läuft in der Datenbank)
 
-*Braucht:* V-08 · *Kosten:* 0 Neurons
+*Braucht:* V-08 - *Kosten:* 0 Neurons
 
-#### US-21 – Tagesverbrauch anzeigen · S · Should
+#### US-21 – Tagesverbrauch anzeigen - S - Should
 Als Nutzer möchte ich sehen, wie viel vom Tageskontingent von Workers AI schon verbraucht ist, damit ich nicht überrascht werde, wenn nichts mehr geht.
 - [x] Anzeige in der Kopfzeile, z. B. „KI heute: 1.240 / 10.000“
 - [x] Farbe wechselt ab 80 % auf Warnung
@@ -384,7 +384,7 @@ Als Nutzer möchte ich sehen, wie viel vom Tageskontingent von Workers AI schon 
 
 ---
 
-## Phase 2 · Teil C – Vorschlag für die Reihenfolge
+## Phase 2 - Teil C – Vorschlag für die Reihenfolge
 
 ```
 Sprint 5   Grundlage      V-07, V-08, V-09, US-21
@@ -397,7 +397,7 @@ Begründung: Die Verbrauchsanzeige kommt zuerst, weil Studio-Funktionen das Kont
 
 ---
 
-## Phase 2 · Definition of Done
+## Phase 2 - Definition of Done
 
 Wie im MVP, zusätzlich:
 - Jede neue KI-Funktion schreibt ihren Verbrauch in `usage_log`
@@ -406,14 +406,14 @@ Wie im MVP, zusätzlich:
 
 ---
 
-## Phase 2 · Entscheidungen
+## Phase 2 - Entscheidungen
 
 | # | Frage | Optionen | Entscheidung |
 |---|---|---|---|
-| 1 | Wann wird die Zusammenfassung erzeugt? | automatisch nach der Verarbeitung · erst beim ersten Aufklappen | ✅ automatisch |
-| 2 | Wie viel Text geht in die Zusammenfassung? | ganzes Dokument · Auswahl bis 12.000 Token | ✅ Auswahl bis 12.000 Token |
-| 3 | Notizen und Studio-Ausgaben speichern | eine Tabelle `notes` mit `kind` · zwei Tabellen | ✅ eine Tabelle `notes` |
-| 4 | Welche Studio-Ausgaben zuerst? | Study Guide · FAQ · Briefing · Zeitleiste | ✅ alle vier, Reihenfolge FAQ, Briefing, Study Guide, Zeitleiste |
-| 5 | Sprache der Volltextsuche | `german` (Wortstämme) · `simple` (exakte Wörter) | ✅ `simple`, Stoppwörter filtert die App |
-| 6 | Verbrauchsanzeige (US-21) | ja · nein | ✅ ja |
-| 7 | Reihenfolge der Sprints | wie in Teil C · andere | ✅ wie in Teil C |
+| 1 | Wann wird die Zusammenfassung erzeugt? | automatisch nach der Verarbeitung - erst beim ersten Aufklappen | ✅ automatisch |
+| 2 | Wie viel Text geht in die Zusammenfassung? | ganzes Dokument - Auswahl bis 12.000 Token | ✅ Auswahl bis 12.000 Token |
+| 3 | Notizen und Studio-Ausgaben speichern | eine Tabelle `notes` mit `kind` - zwei Tabellen | ✅ eine Tabelle `notes` |
+| 4 | Welche Studio-Ausgaben zuerst? | Study Guide - FAQ - Briefing - Zeitleiste | ✅ alle vier, Reihenfolge FAQ, Briefing, Study Guide, Zeitleiste |
+| 5 | Sprache der Volltextsuche | `german` (Wortstämme) - `simple` (exakte Wörter) | ✅ `simple`, Stoppwörter filtert die App |
+| 6 | Verbrauchsanzeige (US-21) | ja - nein | ✅ ja |
+| 7 | Reihenfolge der Sprints | wie in Teil C - andere | ✅ wie in Teil C |

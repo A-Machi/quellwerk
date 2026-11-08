@@ -113,7 +113,7 @@ export function StudioPanel({ notes, actions }: { notes: StoredNote[]; actions: 
             <p className="mt-2 text-xs text-muted-foreground">
               {selectedIds.length === 0
                 ? "Wähle links mindestens eine Quelle aus."
-                : `Aus ${selectedIds.length} ${selectedIds.length === 1 ? "Quelle" : "Quellen"} · ca. ${STUDIO_NEURON_ESTIMATE} Neurons pro Ausgabe`}
+                : `Aus ${selectedIds.length} ${selectedIds.length === 1 ? "Quelle" : "Quellen"} - ca. ${STUDIO_NEURON_ESTIMATE} Neurons pro Ausgabe`}
             </p>
           </div>
 
@@ -154,7 +154,7 @@ export function StudioPanel({ notes, actions }: { notes: StoredNote[]; actions: 
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-medium">{note.title}</span>
                         <span className="text-xs text-muted-foreground">
-                          {NOTE_KIND_LABELS[note.kind]} · {formatDate(note.createdAt)}
+                          {NOTE_KIND_LABELS[note.kind]} - {formatDate(note.createdAt)}
                         </span>
                       </span>
                     </button>

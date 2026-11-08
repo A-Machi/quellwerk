@@ -44,7 +44,7 @@ export function NoteDialog({
             <DialogHeader>
               <DialogTitle>{note.title}</DialogTitle>
               <DialogDescription>
-                {NOTE_KIND_LABELS[note.kind]} · {formatDate(note.createdAt)}
+                {NOTE_KIND_LABELS[note.kind]} - {formatDate(note.createdAt)}
               </DialogDescription>
             </DialogHeader>
             <div className="min-h-0 flex-1 overflow-y-auto pr-1" data-testid="note-content">

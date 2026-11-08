@@ -7,7 +7,7 @@ import {
 } from "@/frontend/components/ui/resizable";
 import { ScrollArea } from "@/frontend/components/ui/scroll-area";
 
-// 3-Spalten-Layout eines Notebooks: Quellen · Chat · Studio.
+// 3-Spalten-Layout eines Notebooks: Quellen - Chat - Studio.
 // Kopfzeile, Quellen- und Chat-Spalte kommen als fertige Elemente von der Seite.
 export function NotebookShell({
   header,

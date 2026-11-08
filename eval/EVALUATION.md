@@ -2,7 +2,7 @@
 
 Am Anfang stand ein Stack-Vorschlag mit Gemini, Vercel und Supabase Cloud. Mit den Projektregeln (nur Open Source, keine Kosten, alles in der Cloud) hat sich der Stack geändert. Dieses Dokument hält fest, was evaluiert wurde, wie entschieden wurde und was am Ende gebaut ist.
 
-Stand: 2026-11-08 · MVP und Phase 2 sind umgesetzt und live unter https://quellwerk.vercel.app
+Stand: 2026-11-08 - MVP und Phase 2 sind umgesetzt und live unter https://quellwerk.vercel.app
 
 Verbindlich für Regeln und Konfiguration ist [CLAUDE.md](../CLAUDE.md). User Stories, Akzeptanzkriterien und Fortschritt stehen in [MVP_USER_STORIES.md](MVP_USER_STORIES.md).
 

@@ -179,7 +179,7 @@ export function SourcePanel({
           </Button>
         </div>
         <p className="mt-2 text-center text-xs text-muted-foreground">
-          PDFs auch hierher ziehen · max. 50 MB pro Datei
+          PDFs auch hierher ziehen - max. 50 MB pro Datei
         </p>
         <TextSourceDialog
           open={textDialogOpen}

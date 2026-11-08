@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/frontend/components/ui/card";
 
-export const metadata: Metadata = { title: "Anmelden · Quellwerk" };
+export const metadata: Metadata = { title: "Anmelden - Quellwerk" };
 
 // US-00: Login. Registrierung ist in Supabase ausgeschaltet.
 export default function LoginPage() {

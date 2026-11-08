@@ -281,7 +281,7 @@ export function ChatPanel({
         {readyCount > 0 ? (
           <p className="mt-1.5 text-xs text-muted-foreground">
             Durchsucht {selectedIds.length} von {readyCount}{" "}
-            {readyCount === 1 ? "Quelle" : "Quellen"} · Enter sendet,
+            {readyCount === 1 ? "Quelle" : "Quellen"} - Enter sendet,
             Shift+Enter für neue Zeile
           </p>
         ) : null}

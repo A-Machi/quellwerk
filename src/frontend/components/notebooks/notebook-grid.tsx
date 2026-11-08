@@ -53,7 +53,7 @@ export function NotebookGrid({
                   </Link>
                 </CardTitle>
                 <CardDescription>
-                  {formatSourceCount(notebook.sourceCount)} · {formatDate(notebook.updatedAt)}
+                  {formatSourceCount(notebook.sourceCount)} - {formatDate(notebook.updatedAt)}
                 </CardDescription>
               </CardHeader>
               <div className="absolute top-3 right-3">
