@@ -1,3 +1,8 @@
+// Anzeigename: nur der Teil vor dem @, "demo@quellwerk.com" -> "demo"
+export function displayNameFromEmail(email: string): string {
+  return email.split("@")[0] || email;
+}
+
 // Initialen aus der E-Mail: "ayman.machi@…" -> "AM", "demo@…" -> "DE"
 export function initialsFromEmail(email: string): string {
   const local = email.split("@")[0] ?? "";

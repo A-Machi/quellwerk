@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { avatarHue, initialsFromEmail } from "@/frontend/lib/user";
+import { avatarHue, displayNameFromEmail, initialsFromEmail } from "@/frontend/lib/user";
+
+describe("displayNameFromEmail", () => {
+  it("zeigt nur den Teil vor dem @", () => {
+    expect(displayNameFromEmail("demo@quellwerk.com")).toBe("demo");
+    expect(displayNameFromEmail("ayman.machi@systecs.com")).toBe("ayman.machi");
+    expect(displayNameFromEmail("ohne-at-zeichen")).toBe("ohne-at-zeichen");
+  });
+});
 
 describe("initialsFromEmail", () => {
   it("nimmt Vor- und Nachname aus dem Teil vor dem @", () => {
@@ -26,7 +34,10 @@ describe("avatarHue", () => {
 
   it("liegt zwischen 0 und 359 und unterscheidet verschiedene Adressen", () => {
     const hues = ["demo@quellwerk.com", "ayman.machi@systecs.com", "test@example.com"].map(avatarHue);
-    for (const hue of hues) expect(hue).toBeGreaterThanOrEqual(0), expect(hue).toBeLessThan(360);
+    for (const hue of hues) {
+      expect(hue).toBeGreaterThanOrEqual(0);
+      expect(hue).toBeLessThan(360);
+    }
     expect(new Set(hues).size).toBe(3);
   });
 });

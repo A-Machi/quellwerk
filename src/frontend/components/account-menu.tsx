@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/frontend/components/ui/dropdown-menu";
-import { avatarHue, initialsFromEmail } from "@/frontend/lib/user";
+import { avatarHue, displayNameFromEmail, initialsFromEmail } from "@/frontend/lib/user";
 import { cn } from "@/frontend/lib/utils";
 
 // Konto-Menü in der Kopfzeile: zeigt, wer eingeloggt ist, und bietet das Abmelden an.
@@ -22,17 +22,18 @@ export function AccountMenu({
   signOutAction: () => Promise<void>;
 }) {
   const [pending, startTransition] = useTransition();
+  const name = displayNameFromEmail(email);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={`Konto von ${email}`}
+        aria-label={`Konto von ${name}`}
         className="group/account flex items-center gap-2 rounded-full py-1 pr-2 pl-1 text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 data-popup-open:bg-muted"
         data-testid="account-menu"
       >
         <Avatar email={email} />
         <span className="hidden max-w-48 truncate text-muted-foreground group-hover/account:text-foreground lg:block">
-          {email}
+          {name}
         </span>
         <ChevronDown
           className="size-3.5 text-muted-foreground transition-transform group-data-popup-open/account:rotate-180"
@@ -44,8 +45,8 @@ export function AccountMenu({
           <Avatar email={email} size="lg" />
           <div className="min-w-0">
             <p className="text-xs text-muted-foreground">Angemeldet als</p>
-            <p className="truncate text-sm font-medium" title={email}>
-              {email}
+            <p className="truncate text-sm font-medium" title={name}>
+              {name}
             </p>
           </div>
         </div>
