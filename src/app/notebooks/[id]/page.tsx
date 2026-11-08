@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { signOutAction } from "@/app/auth-actions";
 import { UsageBadge } from "@/app/usage-badge";
+import { UserBadge } from "@/app/user-badge";
 import { renameNotebookAction } from "@/app/notebook-actions";
 import {
   clearChatAction,
@@ -91,6 +92,11 @@ async function NotebookView({
             usage={
               <Suspense fallback={null}>
                 <UsageBadge />
+              </Suspense>
+            }
+            user={
+              <Suspense fallback={<Skeleton className="size-7 rounded-full" />}>
+                <UserBadge />
               </Suspense>
             }
           >

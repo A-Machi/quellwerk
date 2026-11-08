@@ -5,14 +5,17 @@ import { ThemeToggle } from "@/frontend/components/theme-toggle";
 import { Button } from "@/frontend/components/ui/button";
 
 // Kopfzeile aller eingeloggten Seiten. `children` steht rechts neben dem Logo,
-// z. B. der Notebook-Titel.
+// z. B. der Notebook-Titel. `user` ist das Konto-Menü, ohne es gibt es einen
+// einfachen Abmelden-Button.
 export function AppHeader({
   signOutAction,
   usage,
+  user,
   children,
 }: {
   signOutAction: () => Promise<void>;
   usage?: React.ReactNode;
+  user?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   return (
@@ -30,12 +33,14 @@ export function AppHeader({
       )}
       {usage}
       <ThemeToggle />
-      <form action={signOutAction}>
-        <Button type="submit" variant="ghost" size="sm">
-          <LogOut />
-          Abmelden
-        </Button>
-      </form>
+      {user ?? (
+        <form action={signOutAction}>
+          <Button type="submit" variant="ghost" size="sm">
+            <LogOut />
+            Abmelden
+          </Button>
+        </form>
+      )}
     </header>
   );
 }
