@@ -14,16 +14,12 @@ Verbindlich für Regeln und Konfiguration ist [CLAUDE.md](../CLAUDE.md). User St
 |---|---|---|
 | Notebooks | Projekte, die mehrere Quellen bündeln | ✅ umgesetzt |
 | Quellen | PDF hochladen, Text einfügen, Notiz als Quelle | ✅ umgesetzt |
-| Weitere Quellentypen | URL, Google Docs, Audio | ⚪ Phase 3 |
 | Quellen-Auswahl | Checkbox pro Quelle, Auswahl bleibt gespeichert | ✅ umgesetzt |
 | Chat mit Quellenangaben | Gestreamte Antwort, Zitate als Chips, Klick öffnet das PDF auf der Seite | ✅ umgesetzt |
 | Chatverlauf | Bleibt nach dem Neuladen, Folgefragen werden verstanden | ✅ umgesetzt |
 | Quellen-Zusammenfassung | Kurzfassung und Schlüsselthemen nach dem Upload | ✅ umgesetzt |
 | Notizen | Antworten speichern, eigene Notizen schreiben | ✅ umgesetzt |
 | Studio | FAQ, Briefing, Study Guide, Zeitleiste | ✅ umgesetzt |
-| Mind Map | Grafische Übersicht der Themen | ⚪ Phase 3 |
-| Audio Overview | Podcast mit zwei Stimmen über die Quellen | ⚪ Phase 3 |
-| Teilen | Notebook mit anderen teilen | ⚪ Phase 3 |
 | Login | Ein Nutzer, Registrierung aus | ✅ umgesetzt |
 | Dark Mode | Hell, Dunkel oder System | ✅ umgesetzt |
 | Verbrauchsanzeige | Tagesverbrauch von Workers AI in der Kopfzeile | ✅ umgesetzt |
@@ -177,17 +173,8 @@ Weitere Grenzen:
 
 ---
 
-## 10. Offene Punkte
+## 10. Wartung
 
-**Phase 3 (nicht geplant, nur gesammelt)**
-- **Audio Overview** mit offenem Text-to-Speech (z. B. Kokoro, Piper). Die Lizenzen der Stimmen müssen einzeln geprüft werden.
-- **Teilen** mit anderen Nutzern
-- **Weitere Quellen:** URLs und Texterkennung (OCR) für gescannte PDFs
-- **Mind Map**
-- **Browser-Tests** mit Playwright. Playwright lädt einen eigenen Browser herunter, das muss freigegeben werden.
-- **Re-Ranking** der Suchtreffer, falls die Antwortqualität nicht reicht
-
-**Wartung**
 - **Cloudflare-Token** läuft am **07.11.2027** ab. Dann einen neuen in `.env.local` und in Vercel eintragen.
 - **Abschaltung von Modellen:** Cloudflare kündigt sie an (`planned_deprecation_date`). Trifft es gpt-oss-20b, `CHAT_MODEL` auf `@cf/mistralai/mistral-small-3.1-24b-instruct` umstellen.
 - **Supabase-Pause:** Pausiert das Projekt nach einer Woche ohne Nutzung, lässt es sich im Dashboard wieder starten.

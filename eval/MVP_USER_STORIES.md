@@ -249,8 +249,6 @@ Entschieden am 2026-11-07: Phase 2 wird komplett umgesetzt, bei offenen Fragen g
 Phase 2 füllt die Studio-Spalte und macht Quellen schneller verständlich:
 Zusammenfassungen pro Quelle, Studio-Ausgaben (Study Guide, FAQ, Briefing, Zeitleiste), Notizen und eine bessere Suche.
 
-Nicht in Phase 2: Audio Overview (Podcast), Teilen mit anderen Nutzern, weitere Quellentypen wie URLs. Das bleibt Phase 3.
-
 ## Phase 2 · Das Free-Tier-Limit als wichtigste Randbedingung
 
 Workers AI erlaubt **10.000 Neurons pro Tag**. Im MVP kostet eine Chat-Frage etwa 130 Neurons, weil nur 8 Abschnitte ans Modell gehen. Studio-Funktionen lesen deutlich mehr Text. Deshalb gilt für Phase 2:
